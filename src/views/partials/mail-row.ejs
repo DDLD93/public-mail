@@ -2,6 +2,10 @@
 const m = mail;
 const isUnread = m.status === 'unread';
 const sender = displayName(m.fromName, m.fromAddress);
+const dom = domainOf(m.fromAddress);
+const domDot = dom ? domainColor(dom) : '';
+const curDomain = (typeof activeDomain !== 'undefined' && activeDomain) ? String(activeDomain).toLowerCase() : null;
+const domActive = curDomain && dom && curDomain === dom;
 %>
 <a href="/mail/<%= m.id %>" data-mail-id="<%= m.id %>"
    class="mail-row group relative grid grid-cols-[auto_auto_1fr_auto] items-start gap-2.5 sm:gap-3.5 px-3 sm:px-6 py-3 border-b border-coal-900/10 dark:border-coal-50/[0.07] hover:bg-phos-500/[0.05] dark:hover:bg-phos-400/[0.05] transition-colors">
@@ -24,9 +28,16 @@ const sender = displayName(m.fromName, m.fromAddress);
   </span>
 
   <div class="min-w-0">
-    <div class="flex items-baseline gap-2 mb-0.5">
+    <div class="flex items-center gap-2 mb-0.5">
       <span class="truncate text-[13px] <%= isUnread ? 'font-semibold text-coal-900 dark:text-coal-50' : 'text-coal-500 dark:text-coal-200' %>"><%= sender %></span>
-      <span class="truncate text-[11px] text-coal-300 dark:text-coal-300 hidden sm:inline">&lt;<%= m.fromAddress %>&gt;</span>
+      <% if (dom) { %>
+        <button type="button"
+                onclick="event.preventDefault();event.stopPropagation();location.href='/?domain=<%= encodeURIComponent(dom) %>'"
+                title="Filter by @<%= dom %>"
+                class="shrink-0 inline-flex items-center gap-1 px-1.5 h-[18px] text-[10px] border transition-colors <%= domActive ? 'border-phos-500 text-phos-600 dark:text-phos-400 bg-phos-500/10' : 'border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200 hover:border-phos-500 hover:text-phos-500' %>">
+          <span class="w-1.5 h-1.5 <%= domDot %>"></span><%= dom %>
+        </button>
+      <% } %>
       <% if (m.labels && m.labels.length) { %>
         <% m.labels.slice(0,2).forEach(function(l) { %>
           <span class="hidden md:inline-flex text-[9px] uppercase tracking-wider px-1.5 py-0.5 border border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200">#<%= l %></span>

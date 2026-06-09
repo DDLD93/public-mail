@@ -1,4 +1,4 @@
-<%- include('partials/toolbar', { folder, q, label, unread, starred, attachmentsOnly }) %>
+<%- include('partials/toolbar', { folder, q, label, domain, unread, starred, attachmentsOnly }) %>
 
 <div class="flex-1 overflow-y-auto" x-data="mailList()" id="mailList">
   <% if (typeof notFound !== 'undefined' && notFound) { %>
@@ -12,7 +12,8 @@
       <% items.forEach(function(m) { %>
         <%- include('partials/mail-row', {
           mail: m,
-          relativeTimeStr, initials, avatarColor, displayName
+          relativeTimeStr, initials, avatarColor, displayName, domainOf, domainColor,
+          activeDomain: domain
         }) %>
       <% }); %>
     </div>
@@ -23,6 +24,7 @@
            if (folder) params.set('folder', folder);
            if (q) params.set('q', q);
            if (label) params.set('label', label);
+           if (domain) params.set('domain', domain);
            if (unread) params.set('unread', '1');
            if (starred) params.set('starred', '1');
            if (attachmentsOnly) params.set('attachments', '1');

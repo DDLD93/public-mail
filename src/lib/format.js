@@ -59,6 +59,33 @@ export function displayName(name, address) {
   return address.split('@')[0];
 }
 
+export function domainOf(address) {
+  if (!address) return '';
+  const at = address.lastIndexOf('@');
+  if (at < 0) return '';
+  return address
+    .slice(at + 1)
+    .trim()
+    .toLowerCase()
+    .replace(/[<>"'\s]+$/g, '');
+}
+
+export function domainColor(domain) {
+  const palette = [
+    'bg-phos-400',
+    'bg-emerald-400',
+    'bg-sky-400',
+    'bg-violet-400',
+    'bg-rose-400',
+    'bg-amber-400',
+    'bg-cyan-400',
+    'bg-lime-400',
+  ];
+  let h = 0;
+  for (let i = 0; i < domain.length; i++) h = (h * 31 + domain.charCodeAt(i)) >>> 0;
+  return palette[h % palette.length];
+}
+
 export function escapeHtml(s) {
   if (s == null) return '';
   return String(s)

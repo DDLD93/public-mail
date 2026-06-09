@@ -6,9 +6,11 @@ import { parseMail, persistMail } from '../lib/parseMail.js';
 const router = Router();
 
 function checkSecret(req) {
-  const expected = process.env.MAIL_INGEST_TOKEN;
+  const expected = process.env.INCOMING_API_BEARER;
   if (!expected) return false;
-  const given = req.get('mail_ingest_token') || '';
+  const auth = req.get('authorization') || '';
+  if (!auth.startsWith('Bearer ')) return false;
+  const given = auth.slice(7);
   if (given.length !== expected.length) return false;
   try {
     return crypto.timingSafeEqual(Buffer.from(given), Buffer.from(expected));

@@ -1,5 +1,6 @@
 <%
 const sender = displayName(mail.fromName, mail.fromAddress);
+const senderDom = domainOf(mail.fromAddress);
 const toList = participants.filter(p => p.kind === 'to');
 const ccList = participants.filter(p => p.kind === 'cc');
 const bccList = participants.filter(p => p.kind === 'bcc');
@@ -41,9 +42,15 @@ const bccList = participants.filter(p => p.kind === 'bcc');
         <%= initials(mail.fromName, mail.fromAddress) %>
       </div>
       <div class="min-w-0 flex-1">
-        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span class="font-semibold text-[14px]"><%= sender %></span>
           <span class="text-[12px] text-coal-300 dark:text-coal-300">&lt;<%= mail.fromAddress %>&gt;</span>
+          <% if (senderDom) { %>
+            <a href="/?domain=<%= encodeURIComponent(senderDom) %>" title="Filter by @<%= senderDom %>"
+               class="inline-flex items-center gap-1 px-1.5 h-[18px] text-[10px] border border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200 hover:border-phos-500 hover:text-phos-500 transition-colors">
+              <span class="w-1.5 h-1.5 <%= domainColor(senderDom) %>"></span><%= senderDom %>
+            </a>
+          <% } %>
         </div>
         <button @click="open = !open" class="text-[12px] text-coal-400 dark:text-coal-200 hover:text-phos-600 dark:hover:text-phos-400 inline-flex items-center gap-1 mt-1 transition-colors">
           <span x-text="open ? '[-] hide headers' : '[+] show headers'"></span>

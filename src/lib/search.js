@@ -1,7 +1,7 @@
 import { and, or, eq, desc, lt, sql, ilike, arrayContains } from 'drizzle-orm';
 import { mails } from '../db/schema.js';
 
-export function buildMailFilters({ folder, q, label, unread, starred, attachments }) {
+export function buildMailFilters({ folder, q, label, domain, unread, starred, attachments }) {
   const clauses = [];
 
   if (folder && folder !== 'all') {
@@ -27,6 +27,11 @@ export function buildMailFilters({ folder, q, label, unread, starred, attachment
 
   if (label) {
     clauses.push(arrayContains(mails.labels, [label]));
+  }
+  if (domain) {
+    clauses.push(
+      sql`lower(split_part(${mails.fromAddress}, '@', 2)) = ${domain.toLowerCase()}`
+    );
   }
   if (unread) clauses.push(eq(mails.status, 'unread'));
   if (starred) clauses.push(eq(mails.starred, true));
@@ -79,6 +84,22 @@ export async function labelCounts(db) {
       sum(case when status='unread' then 1 else 0 end)::int as unread
     from (select unnest(labels) as label, status from mails where folder <> 'trash') x
     group by label order by label
+  `);
+  return rows.rows || rows;
+}
+
+export async function domainCounts(db, limit = 20) {
+  const rows = await db.execute(sql`
+    select domain, count(*)::int as total,
+      sum(case when status='unread' then 1 else 0 end)::int as unread
+    from (
+      select lower(split_part(from_address, '@', 2)) as domain, status
+      from mails where folder <> 'trash'
+    ) x
+    where domain <> ''
+    group by domain
+    order by total desc, domain asc
+    limit ${limit}
   `);
   return rows.rows || rows;
 }

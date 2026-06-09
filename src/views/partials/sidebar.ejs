@@ -72,6 +72,37 @@ function isActive(name) { return folder === name && !label; }
     </div>
   </div>
 
+  <div>
+    <div class="px-1.5 mb-1.5 text-[10px] uppercase tracking-[0.22em] text-coal-400 dark:text-coal-300 flex items-center justify-between">
+      <span>domains/</span>
+      <% if (typeof domain !== 'undefined' && domain) { %>
+        <a href="/?folder=<%= folder || 'inbox' %>" class="text-phos-600 dark:text-phos-400 normal-case tracking-normal hover:underline">clear</a>
+      <% } %>
+    </div>
+    <div class="space-y-px">
+      <% (sidebar.domains || []).forEach(function(d) {
+           const active = (typeof domain !== 'undefined' && domain) && domain.toLowerCase() === d.domain;
+      %>
+        <a href="/?domain=<%= encodeURIComponent(d.domain) %>"
+           class="sb-row <%= active ? 'sb-row-active' : '' %>" title="@<%= d.domain %>">
+          <span class="flex items-center gap-2.5 truncate">
+            <span class="text-coal-300 dark:text-coal-300">@</span>
+            <span class="w-1.5 h-1.5 <%= domainColor(d.domain) %>"></span>
+            <span class="truncate"><%= d.domain %></span>
+          </span>
+          <% if (d.unread > 0) { %>
+            <span class="text-[11px] tabular-nums text-phos-600 dark:text-phos-400 font-semibold"><%= d.unread %></span>
+          <% } else { %>
+            <span class="text-[11px] tabular-nums text-coal-300 dark:text-coal-300"><%= d.total %></span>
+          <% } %>
+        </a>
+      <% }); %>
+      <% if (!sidebar.domains || sidebar.domains.length === 0) { %>
+        <div class="px-1.5 text-[12px] text-coal-300 dark:text-coal-300">— none —</div>
+      <% } %>
+    </div>
+  </div>
+
   <div class="mt-auto pt-5 border-t border-coal-900/15 dark:border-coal-50/12">
     <div class="px-1.5">
       <div class="text-[10px] uppercase tracking-[0.22em] text-coal-400 dark:text-coal-300 mb-1.5">endpoint</div>

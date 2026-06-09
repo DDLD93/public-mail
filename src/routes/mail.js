@@ -2,25 +2,28 @@ import { Router } from 'express';
 import { eq, sql, and, inArray, desc, asc } from 'drizzle-orm';
 import { db } from '../db/client.js';
 import { mails, mailParticipants, attachments } from '../db/schema.js';
-import { listMails, folderCounts, labelCounts, starredCount } from '../lib/search.js';
+import { listMails, folderCounts, labelCounts, domainCounts, starredCount } from '../lib/search.js';
 import { sanitizeMailHtml } from '../lib/sanitize.js';
-import { relativeTimeStr, fullTime, initials, avatarColor, fmtBytes, displayName, escapeHtml } from '../lib/format.js';
+import { relativeTimeStr, fullTime, initials, avatarColor, fmtBytes, displayName, escapeHtml, domainOf, domainColor } from '../lib/format.js';
 
 const router = Router();
 
 const SYSTEM_FOLDERS = ['inbox', 'archive', 'trash', 'spam'];
 
 async function getSidebar() {
-  const [counts, labels, starred] = await Promise.all([
+  const [counts, labels, domains, starred] = await Promise.all([
     folderCounts(db),
     labelCounts(db),
+    domainCounts(db),
     starredCount(db),
   ]);
-  return { counts, labels, starred };
+  return { counts, labels, domains, starred };
 }
 
 function commonLocals() {
-  return { relativeTimeStr, fullTime, initials, avatarColor, fmtBytes, displayName, escapeHtml };
+  // `domain: null` default is intentional: Node leaks a legacy global `domain`,
+  // so EJS `typeof domain` is never 'undefined'. Always pass a real local.
+  return { relativeTimeStr, fullTime, initials, avatarColor, fmtBytes, displayName, escapeHtml, domainOf, domainColor, domain: null };
 }
 
 router.get('/', async (req, res, next) => {
@@ -28,6 +31,7 @@ router.get('/', async (req, res, next) => {
     const folder = (req.query.folder || 'inbox').toString();
     const q = (req.query.q || '').toString();
     const label = (req.query.label || '').toString() || null;
+    const domain = (req.query.domain || '').toString().toLowerCase() || null;
     const unread = req.query.unread === '1';
     const starred = req.query.starred === '1';
     const attachmentsOnly = req.query.attachments === '1';
@@ -38,6 +42,7 @@ router.get('/', async (req, res, next) => {
         folder,
         q,
         label,
+        domain,
         unread,
         starred,
         attachments: attachmentsOnly,
@@ -54,6 +59,7 @@ router.get('/', async (req, res, next) => {
       folder,
       q,
       label,
+      domain,
       unread,
       starred,
       attachmentsOnly,
@@ -76,7 +82,7 @@ router.get('/mail/:id', async (req, res, next) => {
       ...commonLocals(),
       title: 'Not found',
       view: 'inbox',
-      folder: 'inbox', q: '', label: null, unread: false, starred: false, attachmentsOnly: false,
+      folder: 'inbox', q: '', label: null, domain: null, unread: false, starred: false, attachmentsOnly: false,
       items: [], nextCursor: null,
       sidebar: await getSidebar(),
       selected: null, systemFolders: SYSTEM_FOLDERS,

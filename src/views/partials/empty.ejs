@@ -11,7 +11,7 @@
       </div>
       <pre class="text-[11px] text-coal-50 overflow-x-auto leading-relaxed"><code><span class="text-phos-400">$</span> curl -X POST http://localhost:<%= process.env.PORT || 3000 %>/webhook/mail \
     -H <span class="text-phos-300">"Content-Type: application/json"</span> \
-    -H <span class="text-phos-300">"MAIL_INGEST_TOKEN: $MAIL_INGEST_TOKEN"</span> \
+    -H <span class="text-phos-300">"Authorization: Bearer $INCOMING_API_BEARER"</span> \
     -d @sample-payload.json</code></pre>
     </div>
   </div>

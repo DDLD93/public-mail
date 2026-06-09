@@ -108,7 +108,7 @@
 
       <!-- Sidebar desktop -->
       <aside class="hidden md:flex md:flex-col w-56 lg:w-60 shrink-0 border-r border-coal-900/15 dark:border-coal-50/12">
-        <%- include('partials/sidebar', { sidebar: sidebar, folder: typeof folder !== 'undefined' ? folder : null, label: typeof label !== 'undefined' ? label : null, systemFolders: systemFolders }) %>
+        <%- include('partials/sidebar', { sidebar: sidebar, folder: typeof folder !== 'undefined' ? folder : null, label: typeof label !== 'undefined' ? label : null, domain: typeof domain !== 'undefined' ? domain : null, domainColor: domainColor, systemFolders: systemFolders }) %>
       </aside>
 
       <!-- Mobile drawer -->
@@ -116,7 +116,7 @@
         <div class="absolute inset-0 bg-coal-950/60" @click="sidebarOpen = false"></div>
         <aside class="absolute inset-y-0 left-0 w-72 max-w-[82%] bg-bone-50 dark:bg-coal-950 border-r border-phos-500/40 flex flex-col"
                x-transition:enter="transition transform duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0">
-          <%- include('partials/sidebar', { sidebar: sidebar, folder: typeof folder !== 'undefined' ? folder : null, label: typeof label !== 'undefined' ? label : null, systemFolders: systemFolders }) %>
+          <%- include('partials/sidebar', { sidebar: sidebar, folder: typeof folder !== 'undefined' ? folder : null, label: typeof label !== 'undefined' ? label : null, domain: typeof domain !== 'undefined' ? domain : null, domainColor: domainColor, systemFolders: systemFolders }) %>
         </aside>
       </div>
 
