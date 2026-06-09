@@ -148,8 +148,8 @@ function appShell() {
           if (ok) {
             btn.dataset.state = on ? 'off' : 'on';
             btn.innerHTML = on
-              ? '<i data-lucide="star" class="w-3.5 h-3.5 text-ink-200 dark:text-ink-600"></i>'
-              : '<i data-lucide="star" class="w-3.5 h-3.5 fill-sienna-500 text-sienna-500"></i>';
+              ? '<i data-lucide="star" class="w-3.5 h-3.5 text-coal-200 dark:text-coal-400"></i>'
+              : '<i data-lucide="star" class="w-3.5 h-3.5 fill-phos-400 text-phos-400"></i>';
             this.refreshIcons();
             this.toast(on ? 'Unstarred' : 'Starred', { icon: 'star' });
           }

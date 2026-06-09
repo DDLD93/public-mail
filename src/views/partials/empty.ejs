@@ -1,16 +1,18 @@
-<div class="flex-1 grid place-items-center p-8">
-  <div class="text-center max-w-md">
-    <div class="mx-auto mb-6 w-14 h-14 rounded-full border border-ink-200 dark:border-ink-700 grid place-items-center">
-      <i data-lucide="feather" class="w-5 h-5 text-ink-300 dark:text-ink-500"></i>
+<div class="flex-1 grid place-items-center p-6">
+  <div class="text-center max-w-md w-full">
+    <div class="mx-auto mb-5 w-12 h-12 border border-phos-500/60 grid place-items-center text-phos-500">
+      <i data-lucide="inbox" class="w-5 h-5"></i>
     </div>
-    <h2 class="font-serif text-[28px] tracking-tight mb-1.5">Nothing in the post today.</h2>
-    <p class="text-ink-400 dark:text-ink-500 mb-6 text-[14px]">When a message arrives via your webhook, it'll appear right here.</p>
-    <div class="text-left bg-paper-100/60 dark:bg-ink-900/60 border border-ink-200/60 dark:border-ink-700/60 rounded-md p-4">
-      <div class="text-[10px] uppercase tracking-[0.18em] text-ink-400 mb-2">Test it</div>
-      <pre class="text-[11px] font-mono text-ink-600 dark:text-ink-300 overflow-x-auto leading-relaxed"><code>curl -X POST http://localhost:<%= process.env.PORT || 3000 %>/webhook/mail \
-  -H "Content-Type: application/json" \
-  -H "X-Webhook-Secret: $WEBHOOK_SECRET" \
-  -d @sample-payload.json</code></pre>
+    <h2 class="text-[18px] tracking-tight mb-1.5 font-semibold lowercase">0 messages · queue empty</h2>
+    <p class="text-coal-400 dark:text-coal-200 mb-6 text-[13px]">stdin idle — waiting on POST /webhook/mail</p>
+    <div class="text-left bg-coal-950 border border-phos-500/40 p-4">
+      <div class="text-[10px] uppercase tracking-[0.2em] text-phos-400 mb-2 flex items-center gap-1.5">
+        <i data-lucide="terminal" class="w-3 h-3"></i> test it
+      </div>
+      <pre class="text-[11px] text-coal-50 overflow-x-auto leading-relaxed"><code><span class="text-phos-400">$</span> curl -X POST http://localhost:<%= process.env.PORT || 3000 %>/webhook/mail \
+    -H <span class="text-phos-300">"Content-Type: application/json"</span> \
+    -H <span class="text-phos-300">"MAIL_INGEST_TOKEN: $MAIL_INGEST_TOKEN"</span> \
+    -d @sample-payload.json</code></pre>
     </div>
   </div>
 </div>

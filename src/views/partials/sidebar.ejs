@@ -1,20 +1,22 @@
 <%
 const folderMeta = {
-  inbox:   { label: 'Inbox',   icon: 'inbox' },
-  archive: { label: 'Archive', icon: 'archive' },
-  spam:    { label: 'Spam',    icon: 'shield-alert' },
-  trash:   { label: 'Trash',   icon: 'trash-2' },
+  inbox:   { label: 'inbox',   icon: 'inbox' },
+  archive: { label: 'archive', icon: 'archive' },
+  spam:    { label: 'spam',    icon: 'shield-alert' },
+  trash:   { label: 'trash',   icon: 'trash-2' },
 };
 function isActive(name) { return folder === name && !label; }
 %>
-<div class="flex-1 overflow-y-auto px-3 sm:px-5 py-6 space-y-7">
+<div class="flex-1 overflow-y-auto px-3 sm:px-4 py-5 space-y-6 flex flex-col">
 
-  <div class="px-2">
-    <div class="text-[10px] uppercase tracking-[0.18em] text-ink-400 dark:text-ink-500 mb-1">The Mailroom</div>
-    <div class="font-serif text-[15px] italic text-ink-500 dark:text-ink-400">Recently delivered</div>
+  <div class="px-1.5">
+    <div class="text-[10px] uppercase tracking-[0.22em] text-phos-600 dark:text-phos-400 mb-1 flex items-center gap-1.5">
+      <span class="w-1 h-1 bg-phos-400"></span> mailroom
+    </div>
+    <div class="text-[12px] text-coal-400 dark:text-coal-200">~/recently-delivered</div>
   </div>
 
-  <nav class="space-y-0.5">
+  <nav class="space-y-px">
     <% for (const f of systemFolders) {
          const meta = folderMeta[f];
          const c = (sidebar.counts && sidebar.counts[f]) || { unread: 0, total: 0 };
@@ -22,57 +24,60 @@ function isActive(name) { return folder === name && !label; }
     %>
       <a href="/?folder=<%= f %>"
          class="sb-row <%= active ? 'sb-row-active' : '' %>">
-        <span class="flex items-center gap-3 min-w-0">
-          <i data-lucide="<%= meta.icon %>" class="w-[15px] h-[15px] opacity-60"></i>
+        <span class="flex items-center gap-2.5 min-w-0">
+          <i data-lucide="<%= meta.icon %>" class="w-[15px] h-[15px] opacity-70"></i>
           <span class="truncate"><%= meta.label %></span>
         </span>
         <% if (c.unread > 0) { %>
-          <span class="text-[11px] font-mono tabular-nums text-sienna-600 dark:text-sienna-300"><%= c.unread %></span>
+          <span class="text-[11px] tabular-nums text-phos-600 dark:text-phos-400 font-semibold"><%= c.unread %></span>
         <% } else if (c.total > 0 && f !== 'inbox') { %>
-          <span class="text-[11px] font-mono tabular-nums text-ink-300 dark:text-ink-500"><%= c.total %></span>
+          <span class="text-[11px] tabular-nums text-coal-300 dark:text-coal-300"><%= c.total %></span>
         <% } %>
       </a>
     <% } %>
 
     <a href="/?starred=1" class="sb-row">
-      <span class="flex items-center gap-3">
-        <i data-lucide="star" class="w-[15px] h-[15px] opacity-60"></i>
-        <span>Starred</span>
+      <span class="flex items-center gap-2.5">
+        <i data-lucide="star" class="w-[15px] h-[15px] opacity-70"></i>
+        <span>starred</span>
       </span>
       <% if (sidebar.starred > 0) { %>
-        <span class="text-[11px] font-mono tabular-nums text-ink-300 dark:text-ink-500"><%= sidebar.starred %></span>
+        <span class="text-[11px] tabular-nums text-coal-300 dark:text-coal-300"><%= sidebar.starred %></span>
       <% } %>
     </a>
   </nav>
 
   <div>
-    <div class="px-2 mb-2 text-[10px] uppercase tracking-[0.18em] text-ink-400 dark:text-ink-500">Labels</div>
-    <div class="space-y-0.5">
+    <div class="px-1.5 mb-1.5 text-[10px] uppercase tracking-[0.22em] text-coal-400 dark:text-coal-300">labels/</div>
+    <div class="space-y-px">
       <% (sidebar.labels || []).forEach(function(l, i) {
-           const dotColors = ['bg-sienna-400','bg-emerald-500','bg-sky-500','bg-violet-500','bg-rose-500','bg-amber-500'];
+           const dotColors = ['bg-phos-400','bg-emerald-400','bg-sky-400','bg-violet-400','bg-rose-400','bg-amber-400'];
            const dot = dotColors[i % dotColors.length];
       %>
         <a href="/?label=<%= encodeURIComponent(l.label) %>"
            class="sb-row <%= label === l.label ? 'sb-row-active' : '' %>">
-          <span class="flex items-center gap-3 truncate">
-            <span class="w-1.5 h-1.5 rounded-full <%= dot %>"></span>
+          <span class="flex items-center gap-2.5 truncate">
+            <span class="text-coal-300 dark:text-coal-300">#</span>
+            <span class="w-1.5 h-1.5 <%= dot %>"></span>
             <span class="truncate"><%= l.label %></span>
           </span>
           <% if (l.unread > 0) { %>
-            <span class="text-[11px] font-mono tabular-nums text-sienna-600 dark:text-sienna-300"><%= l.unread %></span>
+            <span class="text-[11px] tabular-nums text-phos-600 dark:text-phos-400 font-semibold"><%= l.unread %></span>
           <% } %>
         </a>
       <% }); %>
       <% if (!sidebar.labels || sidebar.labels.length === 0) { %>
-        <div class="px-2 text-[12px] text-ink-300 dark:text-ink-500 italic">None yet</div>
+        <div class="px-1.5 text-[12px] text-coal-300 dark:text-coal-300">— none —</div>
       <% } %>
     </div>
   </div>
 
-  <div class="mt-auto pt-6 border-t border-ink-200/40 dark:border-ink-700/40">
-    <div class="px-2">
-      <div class="text-[10px] uppercase tracking-[0.18em] text-ink-400 dark:text-ink-500 mb-1.5">Endpoint</div>
-      <code class="block text-[11px] font-mono text-ink-500 dark:text-ink-400 break-all">POST /webhook/mail</code>
+  <div class="mt-auto pt-5 border-t border-coal-900/15 dark:border-coal-50/12">
+    <div class="px-1.5">
+      <div class="text-[10px] uppercase tracking-[0.22em] text-coal-400 dark:text-coal-300 mb-1.5">endpoint</div>
+      <code class="block text-[11px] text-phos-600 dark:text-phos-400 break-all">
+        <span class="text-coal-300 dark:text-coal-300">$</span> POST /webhook/mail
+      </code>
     </div>
   </div>
 </div>

@@ -6,7 +6,7 @@ Elegant, mobile-responsive webhook-driven mail viewer. Node.js + Express + EJS +
 
 ```bash
 npm install
-cp .env.example .env      # set DATABASE_URL and WEBHOOK_SECRET
+cp .env.example .env      # set DATABASE_URL and MAIL_INGEST_TOKEN
 npm run db:push           # create tables via drizzle-kit
 npm run dev               # http://localhost:3000
 ```
@@ -16,7 +16,7 @@ npm run dev               # http://localhost:3000
 ```bash
 curl -X POST http://localhost:3000/webhook/mail \
   -H "Content-Type: application/json" \
-  -H "X-Webhook-Secret: $WEBHOOK_SECRET" \
+  -H "MAIL_INGEST_TOKEN: $MAIL_INGEST_TOKEN" \
   -d @sample-payload.json
 ```
 
@@ -58,7 +58,7 @@ The endpoint is idempotent on `messageId` — replays return `200 {duplicate:tru
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/webhook/mail` | Ingest (requires `X-Webhook-Secret`) |
+| POST | `/webhook/mail` | Ingest (requires `MAIL_INGEST_TOKEN`) |
 | GET  | `/` | Inbox / folder / label / search |
 | GET  | `/mail/:id` | Mail detail |
 | POST | `/mail/:id/actions` | star/unstar/read/unread/archive/trash/spam/inbox/important/label-add/label-remove |

@@ -2,43 +2,45 @@
 const m = mail;
 const isUnread = m.status === 'unread';
 const sender = displayName(m.fromName, m.fromAddress);
-const initialsStr = initials(m.fromName, m.fromAddress);
 %>
 <a href="/mail/<%= m.id %>" data-mail-id="<%= m.id %>"
-   class="mail-row group relative grid grid-cols-[auto_auto_auto_1fr_auto] items-center gap-3 sm:gap-4 px-4 sm:px-8 py-4 border-b border-ink-200/40 dark:border-ink-700/40 hover:bg-paper-100/60 dark:hover:bg-ink-900/40 transition-colors">
+   class="mail-row group relative grid grid-cols-[auto_auto_1fr_auto] items-start gap-2.5 sm:gap-3.5 px-3 sm:px-6 py-3 border-b border-coal-900/10 dark:border-coal-50/[0.07] hover:bg-phos-500/[0.05] dark:hover:bg-phos-400/[0.05] transition-colors">
   <% if (isUnread) { %>
-    <span class="absolute left-0 top-0 bottom-0 w-[2px] bg-sienna-500"></span>
+    <span class="absolute left-0 top-0 bottom-0 w-[2px] bg-phos-500 shadow-[0_0_8px_rgba(21,162,89,0.6)]"></span>
   <% } %>
 
-  <input type="checkbox" data-mail-check value="<%= m.id %>" @click.stop="toggleSelect('<%= m.id %>')"
-         class="shrink-0 w-3.5 h-3.5 rounded-sm border-ink-300 dark:border-ink-600 text-ink-700 dark:text-ink-200 focus:ring-1 focus:ring-ink-400 bg-transparent"/>
-
-  <button type="button" data-action="star" data-id="<%= m.id %>" data-state="<%= m.starred ? 'on' : 'off' %>"
-          class="shrink-0 p-1 -m-1 rounded-sm" aria-label="Star">
-    <i data-lucide="star" class="w-3.5 h-3.5 <%= m.starred ? 'fill-sienna-500 text-sienna-500' : 'text-ink-200 dark:text-ink-600 hover:text-sienna-400' %>"></i>
-  </button>
-
-  <div class="w-8 h-8 shrink-0 rounded-full border <%= isUnread ? 'border-ink-800 dark:border-ink-100 bg-paper-100 dark:bg-ink-800' : 'border-ink-200 dark:border-ink-700 bg-transparent' %> grid place-items-center text-[10px] font-medium font-mono tracking-wider <%= isUnread ? 'text-ink-800 dark:text-ink-100' : 'text-ink-400 dark:text-ink-500' %>">
-    <%= initialsStr %>
+  <div class="flex items-center gap-2 pt-0.5 shrink-0">
+    <input type="checkbox" data-mail-check value="<%= m.id %>" @click.stop="toggleSelect('<%= m.id %>')"
+           class="shrink-0 w-3.5 h-3.5 border-coal-300 dark:border-coal-400 bg-transparent focus:ring-1 focus:ring-phos-500 rounded-none"/>
+    <button type="button" data-action="star" data-id="<%= m.id %>" data-state="<%= m.starred ? 'on' : 'off' %>"
+            class="shrink-0 p-0.5 -m-0.5" aria-label="Star">
+      <i data-lucide="star" class="w-3.5 h-3.5 <%= m.starred ? 'fill-phos-400 text-phos-400' : 'text-coal-200 dark:text-coal-400 hover:text-phos-400' %>"></i>
+    </button>
   </div>
+
+  <!-- status glyph -->
+  <span class="pt-1 shrink-0 text-[12px] leading-none <%= isUnread ? 'text-phos-500' : 'text-coal-200 dark:text-coal-400' %>" aria-hidden="true">
+    <%= isUnread ? '●' : '○' %>
+  </span>
 
   <div class="min-w-0">
     <div class="flex items-baseline gap-2 mb-0.5">
-      <span class="truncate text-[14px] <%= isUnread ? 'font-semibold text-ink-900 dark:text-ink-50' : 'text-ink-500 dark:text-ink-300' %>"><%= sender %></span>
+      <span class="truncate text-[13px] <%= isUnread ? 'font-semibold text-coal-900 dark:text-coal-50' : 'text-coal-500 dark:text-coal-200' %>"><%= sender %></span>
+      <span class="truncate text-[11px] text-coal-300 dark:text-coal-300 hidden sm:inline">&lt;<%= m.fromAddress %>&gt;</span>
       <% if (m.labels && m.labels.length) { %>
         <% m.labels.slice(0,2).forEach(function(l) { %>
-          <span class="hidden sm:inline-flex text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-ink-200 dark:border-ink-700 text-ink-500 dark:text-ink-400"><%= l %></span>
+          <span class="hidden md:inline-flex text-[9px] uppercase tracking-wider px-1.5 py-0.5 border border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200">#<%= l %></span>
         <% }) %>
       <% } %>
     </div>
     <div class="flex items-center gap-1.5 mb-0.5">
-      <span class="font-serif text-[16px] leading-snug truncate <%= isUnread ? 'text-ink-900 dark:text-ink-50' : 'text-ink-600 dark:text-ink-300' %>"><%= m.subject || '(no subject)' %></span>
+      <span class="text-[14px] leading-snug truncate font-sans <%= isUnread ? 'font-medium text-coal-900 dark:text-coal-50' : 'text-coal-600 dark:text-coal-100' %>"><%= m.subject || '(no subject)' %></span>
       <% if (m.hasAttachments) { %>
-        <i data-lucide="paperclip" class="w-3 h-3 text-ink-300 dark:text-ink-500 shrink-0"></i>
+        <i data-lucide="paperclip" class="w-3 h-3 text-coal-300 dark:text-coal-300 shrink-0"></i>
       <% } %>
     </div>
-    <div class="truncate text-[13px] text-ink-400 dark:text-ink-500"><%= m.snippet || '' %></div>
+    <div class="truncate text-[12px] text-coal-400 dark:text-coal-300 font-sans"><%= m.snippet || '' %></div>
   </div>
 
-  <div class="text-[11px] text-ink-400 dark:text-ink-500 font-mono tabular-nums shrink-0 self-start pt-0.5"><%= relativeTimeStr(m.receivedAt) %></div>
+  <div class="text-[11px] text-coal-400 dark:text-coal-300 tabular-nums shrink-0 self-start pt-1"><%= relativeTimeStr(m.receivedAt) %></div>
 </a>

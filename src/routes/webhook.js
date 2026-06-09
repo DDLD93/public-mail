@@ -6,9 +6,9 @@ import { parseMail, persistMail } from '../lib/parseMail.js';
 const router = Router();
 
 function checkSecret(req) {
-  const expected = process.env.WEBHOOK_SECRET;
+  const expected = process.env.MAIL_INGEST_TOKEN;
   if (!expected) return false;
-  const given = req.get('x-webhook-secret') || '';
+  const given = req.get('mail_ingest_token') || '';
   if (given.length !== expected.length) return false;
   try {
     return crypto.timingSafeEqual(Buffer.from(given), Buffer.from(expected));

@@ -2,7 +2,7 @@
 
 <div class="flex-1 overflow-y-auto" x-data="mailList()" id="mailList">
   <% if (typeof notFound !== 'undefined' && notFound) { %>
-    <div class="p-8 text-center text-ink-400 italic font-serif">Message not found.</div>
+    <div class="p-8 text-center text-coal-400 dark:text-coal-200 text-[13px]">404 · message not found</div>
   <% } %>
 
   <% if (items.length === 0) { %>
@@ -28,12 +28,12 @@
            if (attachmentsOnly) params.set('attachments', '1');
            params.set('cursor', nextCursor);
         %>
-        <a href="/?<%= params.toString() %>" class="inline-flex items-center gap-2 px-4 h-9 text-[13px] rounded-full border border-ink-200 dark:border-ink-700 hover:border-ink-400 dark:hover:border-ink-500 transition">
-          Older messages <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+        <a href="/?<%= params.toString() %>" class="inline-flex items-center gap-2 px-4 h-9 text-[12px] uppercase tracking-wider border border-coal-900/15 dark:border-coal-50/12 hover:border-phos-500 hover:text-phos-500 transition">
+          load older <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
         </a>
       </div>
     <% } else if (items.length > 0) { %>
-      <div class="px-4 sm:px-8 py-10 text-center font-serif italic text-ink-300 dark:text-ink-600 text-sm">— end —</div>
+      <div class="px-4 sm:px-8 py-10 text-center text-coal-300 dark:text-coal-300 text-[12px] tracking-[0.2em] uppercase">[ eof ]</div>
     <% } %>
   <% } %>
 </div>
