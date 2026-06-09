@@ -1,0 +1,48 @@
+<div class="sticky top-14 z-20 backdrop-blur bg-white/70 dark:bg-ink-950/70 border-b border-ink-200/60 dark:border-ink-800/60">
+  <div class="flex items-center gap-2 px-3 sm:px-4 h-12">
+    <h1 class="font-semibold capitalize text-base sm:text-lg flex items-center gap-2">
+      <% if (label) { %>
+        <i data-lucide="tag" class="w-4 h-4 text-brand-500"></i><%= label %>
+      <% } else if (starred) { %>
+        <i data-lucide="star" class="w-4 h-4 text-amber-400"></i>Starred
+      <% } else { %>
+        <i data-lucide="inbox" class="w-4 h-4 text-brand-500"></i><%= folder %>
+      <% } %>
+    </h1>
+    <div class="ml-auto flex items-center gap-1 overflow-x-auto no-scrollbar">
+      <% function chipUrl(key, val) {
+        const params = new URLSearchParams();
+        if (folder) params.set('folder', folder);
+        if (q) params.set('q', q);
+        if (label) params.set('label', label);
+        if (unread && key !== 'unread') params.set('unread', '1');
+        if (starred && key !== 'starred') params.set('starred', '1');
+        if (attachmentsOnly && key !== 'attachments') params.set('attachments', '1');
+        if (val) params.set(key, '1');
+        return '/?' + params.toString();
+      } %>
+      <a href="<%= chipUrl('unread', !unread) %>" class="chip <%= unread ? 'chip-on' : '' %>">
+        <i data-lucide="mail" class="w-3.5 h-3.5"></i> Unread
+      </a>
+      <a href="<%= chipUrl('starred', !starred) %>" class="chip <%= starred ? 'chip-on' : '' %>">
+        <i data-lucide="star" class="w-3.5 h-3.5"></i> Starred
+      </a>
+      <a href="<%= chipUrl('attachments', !attachmentsOnly) %>" class="chip <%= attachmentsOnly ? 'chip-on' : '' %>">
+        <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Has files
+      </a>
+    </div>
+  </div>
+
+  <!-- Bulk actions bar -->
+  <div x-show="selected.length > 0" x-transition class="flex items-center gap-2 px-3 sm:px-4 h-11 border-t border-ink-200/60 dark:border-ink-800/60 bg-brand-500/5">
+    <span class="text-sm font-medium"><span x-text="selected.length"></span> selected</span>
+    <div class="ml-auto flex items-center gap-1">
+      <button @click="bulk('read')" class="btn-ghost"><i data-lucide="mail-open" class="w-4 h-4"></i> Read</button>
+      <button @click="bulk('unread')" class="btn-ghost"><i data-lucide="mail" class="w-4 h-4"></i> Unread</button>
+      <button @click="bulk('star')" class="btn-ghost"><i data-lucide="star" class="w-4 h-4"></i></button>
+      <button @click="bulk('archive')" class="btn-ghost"><i data-lucide="archive" class="w-4 h-4"></i></button>
+      <button @click="bulk('trash')" class="btn-ghost text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      <button @click="clearSelect()" class="btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+</div>

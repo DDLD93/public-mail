@@ -1,0 +1,37 @@
+<%- include('partials/toolbar', { folder, q, label, unread, starred, attachmentsOnly }) %>
+
+<div class="flex-1 overflow-y-auto" x-data="mailList()" id="mailList">
+  <% if (typeof notFound !== 'undefined' && notFound) { %>
+    <div class="p-8 text-center text-ink-500">Mail not found.</div>
+  <% } %>
+
+  <% if (items.length === 0) { %>
+    <%- include('partials/empty') %>
+  <% } else { %>
+    <div class="divide-y divide-ink-100 dark:divide-ink-800/60">
+      <% items.forEach(function(m) { %>
+        <%- include('partials/mail-row', {
+          mail: m,
+          relativeTimeStr, initials, avatarColor, displayName
+        }) %>
+      <% }); %>
+    </div>
+
+    <% if (nextCursor) { %>
+      <div class="p-4 text-center">
+        <% const params = new URLSearchParams();
+           if (folder) params.set('folder', folder);
+           if (q) params.set('q', q);
+           if (label) params.set('label', label);
+           if (unread) params.set('unread', '1');
+           if (starred) params.set('starred', '1');
+           if (attachmentsOnly) params.set('attachments', '1');
+           params.set('cursor', nextCursor);
+        %>
+        <a href="/?<%= params.toString() %>" class="inline-flex items-center gap-2 px-4 h-10 rounded-xl border border-ink-200 dark:border-ink-700 hover:bg-ink-100 dark:hover:bg-ink-800 transition">
+          <i data-lucide="chevrons-down" class="w-4 h-4"></i> Load older
+        </a>
+      </div>
+    <% } %>
+  <% } %>
+</div>

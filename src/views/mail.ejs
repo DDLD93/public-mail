@@ -1,0 +1,127 @@
+<%
+const sender = displayName(mail.fromName, mail.fromAddress);
+const colorClass = avatarColor(mail.fromAddress || '');
+const toList = participants.filter(p => p.kind === 'to');
+const ccList = participants.filter(p => p.kind === 'cc');
+const bccList = participants.filter(p => p.kind === 'bcc');
+%>
+<div class="sticky top-14 z-20 backdrop-blur bg-white/70 dark:bg-ink-950/70 border-b border-ink-200/60 dark:border-ink-800/60">
+  <div class="flex items-center gap-1 px-3 sm:px-4 h-12">
+    <a href="javascript:history.length>1?history.back():(location.href='/')" class="btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i><span class="hidden sm:inline">Back</span></a>
+    <div class="mx-2 w-px h-5 bg-ink-200 dark:bg-ink-700"></div>
+    <button data-action="archive" data-id="<%= mail.id %>" class="btn-ghost" title="Archive (e)"><i data-lucide="archive" class="w-4 h-4"></i></button>
+    <button data-action="trash" data-id="<%= mail.id %>" class="btn-ghost text-rose-500" title="Trash (#)"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    <button data-action="spam" data-id="<%= mail.id %>" class="btn-ghost" title="Mark as spam"><i data-lucide="shield-alert" class="w-4 h-4"></i></button>
+    <div class="mx-1 w-px h-5 bg-ink-200 dark:bg-ink-700"></div>
+    <button data-action="unread" data-id="<%= mail.id %>" class="btn-ghost" title="Mark unread (u)"><i data-lucide="mail" class="w-4 h-4"></i></button>
+    <button data-action="star" data-id="<%= mail.id %>" data-state="<%= mail.starred ? 'on' : 'off' %>" class="btn-ghost" title="Star (s)">
+      <i data-lucide="star" class="w-4 h-4 <%= mail.starred ? 'fill-amber-400 text-amber-400' : '' %>"></i>
+    </button>
+    <div class="ml-auto text-xs text-ink-400 hidden sm:block"><%= fullTime(mail.receivedAt) %></div>
+  </div>
+</div>
+
+<div class="flex-1 overflow-y-auto">
+  <div class="max-w-3xl mx-auto px-3 sm:px-6 py-6">
+    <!-- Header -->
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4 break-words"><%= mail.subject || '(no subject)' %></h1>
+
+    <% if (mail.labels && mail.labels.length) { %>
+      <div class="flex flex-wrap gap-1.5 mb-4">
+        <% mail.labels.forEach(function(l) { %>
+          <span class="text-xs px-2 py-1 rounded-full bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-500/20"><%= l %></span>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div x-data="{open:false}" class="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-ink-900/60 border border-ink-200 dark:border-ink-800 shadow-sm">
+      <div class="w-11 h-11 shrink-0 rounded-full bg-gradient-to-br <%= colorClass %> text-white grid place-items-center font-bold shadow">
+        <%= initials(mail.fromName, mail.fromAddress) %>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-baseline gap-x-2">
+          <span class="font-semibold"><%= sender %></span>
+          <span class="text-sm text-ink-500">&lt;<%= mail.fromAddress %>&gt;</span>
+          <span class="ml-auto text-xs text-ink-400 sm:hidden"><%= relativeTimeStr(mail.receivedAt) %></span>
+        </div>
+        <button @click="open = !open" class="text-xs text-ink-500 hover:text-brand-500 inline-flex items-center gap-1 mt-0.5">
+          <span x-text="open ? 'Hide details' : 'Show details'"></span>
+          <i :data-lucide="open ? 'chevron-up' : 'chevron-down'" class="w-3 h-3"></i>
+        </button>
+        <div x-show="open" x-transition class="mt-2 text-sm space-y-1 text-ink-600 dark:text-ink-300" style="display:none">
+          <% if (toList.length) { %><div><span class="text-ink-400 mr-1">to</span><%= toList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
+          <% if (ccList.length) { %><div><span class="text-ink-400 mr-1">cc</span><%= ccList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
+          <% if (bccList.length) { %><div><span class="text-ink-400 mr-1">bcc</span><%= bccList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
+          <% if (mail.replyTo) { %><div><span class="text-ink-400 mr-1">reply-to</span><%= mail.replyTo %></div><% } %>
+          <div><span class="text-ink-400 mr-1">received</span><%= fullTime(mail.receivedAt) %></div>
+          <div class="font-mono text-xs break-all"><span class="text-ink-400 mr-1">message-id</span><%= mail.messageId %></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="mt-5 rounded-2xl overflow-hidden border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900/60">
+      <% if (mail.html) { %>
+        <iframe id="mailFrame" sandbox="allow-popups allow-popups-to-escape-sandbox"
+                srcdoc="<%= escapeHtml(`<!doctype html><html><head><meta charset='utf-8'><base target='_blank'><style>html,body{margin:0;padding:16px;font-family:Inter,system-ui,sans-serif;color:#1a2236;line-height:1.55;word-wrap:break-word}body{background:transparent}@media (prefers-color-scheme: dark){html,body{color:#eef1f8}}a{color:#2746ee}img{max-width:100%;height:auto}table{max-width:100%}</style></head><body>${sanitizedHtml}</body></html>`) %>"
+                class="w-full block bg-white dark:bg-ink-900" style="height: 60vh; min-height: 380px;"></iframe>
+      <% } else if (mail.text) { %>
+        <pre class="whitespace-pre-wrap break-words p-5 text-sm leading-relaxed"><%= mail.text %></pre>
+      <% } else { %>
+        <div class="p-5 text-ink-400 italic">(empty body)</div>
+      <% } %>
+    </div>
+
+    <!-- Attachments -->
+    <% if (attachments && attachments.length) { %>
+      <div class="mt-5">
+        <h3 class="text-sm font-semibold text-ink-500 mb-2 flex items-center gap-2">
+          <i data-lucide="paperclip" class="w-4 h-4"></i> <%= attachments.length %> attachment<%= attachments.length === 1 ? '' : 's' %>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <% attachments.forEach(function(a) {
+            const mt = (a.mimeType || '').toLowerCase();
+            let icon = 'file';
+            if (mt.includes('pdf')) icon = 'file-text';
+            else if (mt.startsWith('image/')) icon = 'image';
+            else if (mt.startsWith('video/')) icon = 'film';
+            else if (mt.startsWith('audio/')) icon = 'music';
+            else if (mt.includes('zip') || mt.includes('rar') || mt.includes('tar')) icon = 'file-archive';
+            else if (mt.includes('sheet') || mt.includes('excel')) icon = 'file-spreadsheet';
+            else if (mt.includes('word') || mt.includes('document')) icon = 'file-text';
+          %>
+            <a href="/attachments/<%= a.id %>" class="group flex items-center gap-3 p-3 rounded-xl border border-ink-200 dark:border-ink-800 hover:border-brand-500 hover:bg-brand-500/5 transition">
+              <span class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-700 text-white grid place-items-center shadow">
+                <i data-lucide="<%= icon %>" class="w-5 h-5"></i>
+              </span>
+              <div class="min-w-0 flex-1">
+                <div class="truncate font-medium text-sm"><%= a.filename || 'attachment' %></div>
+                <div class="text-xs text-ink-400"><%= a.mimeType || 'application/octet-stream' %> · <%= fmtBytes(a.sizeBytes) %></div>
+              </div>
+              <i data-lucide="download" class="w-4 h-4 text-ink-400 group-hover:text-brand-500"></i>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const f = document.getElementById('mailFrame');
+    if (!f) return;
+    f.addEventListener('load', function() {
+      try {
+        const doc = f.contentDocument;
+        if (!doc) return;
+        const resize = () => {
+          const h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
+          f.style.height = (h + 24) + 'px';
+        };
+        resize();
+        new ResizeObserver(resize).observe(doc.body);
+      } catch (e) {}
+    });
+  })();
+</script>

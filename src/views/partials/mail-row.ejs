@@ -1,0 +1,37 @@
+<%
+const m = mail;
+const isUnread = m.status === 'unread';
+const sender = displayName(m.fromName, m.fromAddress);
+const initialsStr = initials(m.fromName, m.fromAddress);
+const colorClass = avatarColor(m.fromAddress || '');
+%>
+<a href="/mail/<%= m.id %>" data-mail-id="<%= m.id %>"
+   class="mail-row group flex items-center gap-3 px-3 sm:px-4 py-3 border-b border-ink-100 dark:border-ink-800/60 hover:bg-ink-50 dark:hover:bg-ink-900/50 transition <%= isUnread ? 'bg-white dark:bg-ink-900/30' : 'bg-ink-50/50 dark:bg-transparent' %>">
+  <input type="checkbox" data-mail-check value="<%= m.id %>" @click.stop="toggleSelect('<%= m.id %>')"
+         class="shrink-0 rounded border-ink-300 dark:border-ink-700 text-brand-500 focus:ring-brand-500"/>
+  <button type="button" data-action="star" data-id="<%= m.id %>" data-state="<%= m.starred ? 'on' : 'off' %>"
+          class="shrink-0 p-1 rounded hover:bg-ink-200/60 dark:hover:bg-ink-700/60" aria-label="Star">
+    <i data-lucide="star" class="w-4 h-4 <%= m.starred ? 'fill-amber-400 text-amber-400' : 'text-ink-300' %>"></i>
+  </button>
+  <div class="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br <%= colorClass %> text-white grid place-items-center text-xs font-bold shadow">
+    <%= initialsStr %>
+  </div>
+  <div class="min-w-0 flex-1">
+    <div class="flex items-baseline gap-2">
+      <span class="truncate <%= isUnread ? 'font-semibold' : 'text-ink-600 dark:text-ink-300' %>"><%= sender %></span>
+      <% if (m.labels && m.labels.length) { %>
+        <% m.labels.slice(0,2).forEach(function(l) { %>
+          <span class="hidden sm:inline-flex text-[10px] px-1.5 py-0.5 rounded-full bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-500/20"><%= l %></span>
+        <% }) %>
+      <% } %>
+      <span class="ml-auto text-xs text-ink-400 shrink-0"><%= relativeTimeStr(m.receivedAt) %></span>
+    </div>
+    <div class="flex items-center gap-2 mt-0.5">
+      <span class="truncate <%= isUnread ? 'font-medium' : 'text-ink-500' %>"><%= m.subject || '(no subject)' %></span>
+      <% if (m.hasAttachments) { %>
+        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-ink-400 shrink-0"></i>
+      <% } %>
+    </div>
+    <div class="truncate text-sm text-ink-500 dark:text-ink-400 mt-0.5"><%= m.snippet || '' %></div>
+  </div>
+</a>

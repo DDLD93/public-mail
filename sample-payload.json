@@ -1,0 +1,17 @@
+{
+  "messageId": "<demo-001@public-mail>",
+  "from": { "address": "sender@example.com", "name": "Sender Name" },
+  "to": [{ "address": "user@example.com", "name": "" }],
+  "cc": [],
+  "bcc": [],
+  "subject": "Quarterly report",
+  "html": "<p>Hello, please find the quarterly report attached. <strong>Thanks!</strong></p>",
+  "text": "Hello, please find the quarterly report attached. Thanks!",
+  "attachments": [
+    {
+      "filename": "doc.pdf",
+      "mimeType": "application/pdf",
+      "content": "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+CmVuZG9iagoyIDAgb2JqCjw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0+PgplbmRvYmoKdHJhaWxlcgo8PC9Sb290IDEgMCBSPj4KJSVFT0Y="
+    }
+  ]
+}
