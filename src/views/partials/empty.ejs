@@ -1,13 +1,16 @@
 <div class="flex-1 grid place-items-center p-8">
   <div class="text-center max-w-md">
-    <div class="mx-auto w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-400 to-brand-700 text-white grid place-items-center shadow-glow mb-5">
-      <i data-lucide="mail-plus" class="w-10 h-10"></i>
+    <div class="mx-auto mb-6 w-14 h-14 rounded-full border border-ink-200 dark:border-ink-700 grid place-items-center">
+      <i data-lucide="feather" class="w-5 h-5 text-ink-300 dark:text-ink-500"></i>
     </div>
-    <h2 class="text-xl font-semibold mb-2">Your mailbox is squeaky clean</h2>
-    <p class="text-ink-500 mb-5">When mail arrives via your webhook, it shows up here. Try sending a test event:</p>
-    <pre class="text-left text-xs bg-ink-100 dark:bg-ink-900/70 p-3 rounded-xl overflow-x-auto"><code>curl -X POST http://localhost:<%= process.env.PORT || 3000 %>/webhook/mail \
+    <h2 class="font-serif text-[28px] tracking-tight mb-1.5">Nothing in the post today.</h2>
+    <p class="text-ink-400 dark:text-ink-500 mb-6 text-[14px]">When a message arrives via your webhook, it'll appear right here.</p>
+    <div class="text-left bg-paper-100/60 dark:bg-ink-900/60 border border-ink-200/60 dark:border-ink-700/60 rounded-md p-4">
+      <div class="text-[10px] uppercase tracking-[0.18em] text-ink-400 mb-2">Test it</div>
+      <pre class="text-[11px] font-mono text-ink-600 dark:text-ink-300 overflow-x-auto leading-relaxed"><code>curl -X POST http://localhost:<%= process.env.PORT || 3000 %>/webhook/mail \
   -H "Content-Type: application/json" \
   -H "X-Webhook-Secret: $WEBHOOK_SECRET" \
   -d @sample-payload.json</code></pre>
+    </div>
   </div>
 </div>

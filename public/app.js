@@ -5,10 +5,18 @@ function appShell() {
     shortcutsOpen: false,
     selected: [],
     toasts: [],
+    refreshing: false,
+    lastRefresh: Date.now(),
+    refreshLabel: 'Updated just now',
+    autoRefreshMs: 60_000,
+    _tickTimer: null,
+    _autoTimer: null,
+
     init() {
       this.refreshIcons();
       this.bindShortcuts();
       this.bindRowActions();
+      this.startRefreshClock();
     },
     refreshIcons() {
       if (window.lucide) window.lucide.createIcons();
@@ -23,10 +31,66 @@ function appShell() {
     },
     toast(msg, opts = {}) {
       const id = Math.random().toString(36).slice(2);
-      this.toasts.push({ id, msg, icon: opts.icon, undo: opts.undo });
-      setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, opts.duration || 3500);
+      this.toasts.push({ id, msg, icon: opts.icon });
+      setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, opts.duration || 3200);
       this.refreshIcons();
     },
+
+    // ===== Refresh =====
+    startRefreshClock() {
+      this.updateRefreshLabel();
+      this._tickTimer = setInterval(() => this.updateRefreshLabel(), 1000);
+      this._autoTimer = setTimeout(() => this.refreshNow(true), this.autoRefreshMs);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && Date.now() - this.lastRefresh > this.autoRefreshMs) {
+          this.refreshNow(true);
+        }
+      });
+    },
+    updateRefreshLabel() {
+      const s = Math.max(0, Math.floor((Date.now() - this.lastRefresh) / 1000));
+      let label;
+      if (s < 5) label = 'Updated just now';
+      else if (s < 60) label = `Updated ${s}s ago`;
+      else if (s < 3600) label = `Updated ${Math.floor(s/60)}m ago`;
+      else label = `Updated ${Math.floor(s/3600)}h ago`;
+      this.refreshLabel = label;
+    },
+    refreshNow(auto = false) {
+      if (this.refreshing) return;
+      this.refreshing = true;
+      this.refreshIcons();
+      if (this._autoTimer) clearTimeout(this._autoTimer);
+      // Soft refresh: re-fetch current URL, swap <main> contents
+      fetch(location.href, { headers: { 'Accept': 'text/html' } })
+        .then(r => r.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newMain = doc.querySelector('main');
+          const curMain = document.querySelector('main');
+          if (newMain && curMain) {
+            curMain.innerHTML = newMain.innerHTML;
+          }
+          const newSidebar = doc.querySelector('aside .flex-1');
+          const curSidebar = document.querySelector('aside .flex-1');
+          if (newSidebar && curSidebar) curSidebar.innerHTML = newSidebar.innerHTML;
+
+          this.lastRefresh = Date.now();
+          this.updateRefreshLabel();
+          if (!auto) this.toast('Refreshed', { icon: 'refresh-cw' });
+          this.refreshIcons();
+        })
+        .catch(() => {
+          if (!auto) this.toast('Refresh failed', { icon: 'alert-triangle' });
+        })
+        .finally(() => {
+          setTimeout(() => { this.refreshing = false; }, 600);
+          this._autoTimer = setTimeout(() => this.refreshNow(true), this.autoRefreshMs);
+        });
+    },
+
+    // ===== Selection / bulk =====
     toggleSelect(id) {
       const i = this.selected.indexOf(id);
       if (i >= 0) this.selected.splice(i, 1);
@@ -53,9 +117,9 @@ function appShell() {
         body: JSON.stringify({ ids, action, value }),
       });
       if (res.ok) {
-        this.toast(`${action} · ${ids.length} mail${ids.length === 1 ? '' : 's'}`, { icon: 'check-circle-2' });
+        this.toast(`${action} · ${ids.length}`, { icon: 'check' });
         this.clearSelect();
-        setTimeout(() => location.reload(), 300);
+        setTimeout(() => this.refreshNow(true), 200);
       } else {
         this.toast('Action failed', { icon: 'alert-triangle' });
       }
@@ -83,32 +147,38 @@ function appShell() {
           const ok = await this.actOn(id, on ? 'unstar' : 'star');
           if (ok) {
             btn.dataset.state = on ? 'off' : 'on';
-            const i = btn.querySelector('i[data-lucide]') || btn.querySelector('svg');
-            if (on) {
-              btn.innerHTML = '<i data-lucide="star" class="w-4 h-4 text-ink-300"></i>';
-            } else {
-              btn.innerHTML = '<i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>';
-            }
+            btn.innerHTML = on
+              ? '<i data-lucide="star" class="w-3.5 h-3.5 text-ink-200 dark:text-ink-600"></i>'
+              : '<i data-lucide="star" class="w-3.5 h-3.5 fill-sienna-500 text-sienna-500"></i>';
             this.refreshIcons();
             this.toast(on ? 'Unstarred' : 'Starred', { icon: 'star' });
           }
         } else if (['archive','trash','spam','read','unread'].includes(action)) {
           const ok = await this.actOn(id, action);
           if (ok) {
-            this.toast(action.charAt(0).toUpperCase() + action.slice(1) + 'd', { icon: 'check-circle-2' });
+            const labels = { archive:'Archived', trash:'Trashed', spam:'Marked spam', read:'Read', unread:'Unread' };
+            this.toast(labels[action], { icon: 'check' });
             const row = document.querySelector(`.mail-row[data-mail-id="${id}"]`);
             if (row && ['archive','trash','spam'].includes(action)) {
-              row.style.transition = 'opacity .15s, transform .15s';
-              row.style.opacity = '0';
-              row.style.transform = 'translateX(-12px)';
-              setTimeout(() => row.remove(), 160);
+              row.style.transition = 'opacity .18s ease, transform .18s ease, max-height .25s ease, padding .25s ease';
+              row.style.maxHeight = row.offsetHeight + 'px';
+              requestAnimationFrame(() => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-12px)';
+                row.style.maxHeight = '0';
+                row.style.paddingTop = '0';
+                row.style.paddingBottom = '0';
+              });
+              setTimeout(() => row.remove(), 260);
             } else if (window.location.pathname.startsWith('/mail/')) {
-              setTimeout(() => (location.href = '/'), 300);
+              setTimeout(() => (location.href = '/'), 280);
             }
           }
         }
       });
     },
+
+    // ===== Shortcuts =====
     bindShortcuts() {
       let lastG = 0;
       const focusable = () => document.activeElement && /input|textarea/i.test(document.activeElement.tagName);
@@ -119,6 +189,8 @@ function appShell() {
           document.getElementById('searchInput')?.focus();
         } else if (e.key === '?') {
           this.shortcutsOpen = true;
+        } else if (e.key === 'r') {
+          this.refreshNow();
         } else if (e.key === 'Escape') {
           this.shortcutsOpen = false;
           this.sidebarOpen = false;
@@ -141,7 +213,7 @@ function appShell() {
           }
           if (!id) return;
           const map = { e: 'archive', '#': 'trash', s: 'star', u: 'unread' };
-          this.actOn(id, map[e.key]).then(ok => ok && this.toast(map[e.key], { icon: 'check-circle-2' }));
+          this.actOn(id, map[e.key]).then(ok => ok && this.toast(map[e.key], { icon: 'check' }));
         }
       });
     },
@@ -158,9 +230,5 @@ function appShell() {
 }
 
 function mailList() {
-  return {
-    init() {
-      // page-level hook if needed
-    },
-  };
+  return { init() {} };
 }

@@ -2,13 +2,13 @@
 
 <div class="flex-1 overflow-y-auto" x-data="mailList()" id="mailList">
   <% if (typeof notFound !== 'undefined' && notFound) { %>
-    <div class="p-8 text-center text-ink-500">Mail not found.</div>
+    <div class="p-8 text-center text-ink-400 italic font-serif">Message not found.</div>
   <% } %>
 
   <% if (items.length === 0) { %>
     <%- include('partials/empty') %>
   <% } else { %>
-    <div class="divide-y divide-ink-100 dark:divide-ink-800/60">
+    <div>
       <% items.forEach(function(m) { %>
         <%- include('partials/mail-row', {
           mail: m,
@@ -18,7 +18,7 @@
     </div>
 
     <% if (nextCursor) { %>
-      <div class="p-4 text-center">
+      <div class="px-4 sm:px-8 py-6 text-center">
         <% const params = new URLSearchParams();
            if (folder) params.set('folder', folder);
            if (q) params.set('q', q);
@@ -28,10 +28,12 @@
            if (attachmentsOnly) params.set('attachments', '1');
            params.set('cursor', nextCursor);
         %>
-        <a href="/?<%= params.toString() %>" class="inline-flex items-center gap-2 px-4 h-10 rounded-xl border border-ink-200 dark:border-ink-700 hover:bg-ink-100 dark:hover:bg-ink-800 transition">
-          <i data-lucide="chevrons-down" class="w-4 h-4"></i> Load older
+        <a href="/?<%= params.toString() %>" class="inline-flex items-center gap-2 px-4 h-9 text-[13px] rounded-full border border-ink-200 dark:border-ink-700 hover:border-ink-400 dark:hover:border-ink-500 transition">
+          Older messages <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
         </a>
       </div>
+    <% } else if (items.length > 0) { %>
+      <div class="px-4 sm:px-8 py-10 text-center font-serif italic text-ink-300 dark:text-ink-600 text-sm">— end —</div>
     <% } %>
   <% } %>
 </div>

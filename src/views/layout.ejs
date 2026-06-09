@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)" />
-  <meta name="theme-color" content="#f5f7fb" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#100d0a" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#fbf8f3" media="(prefers-color-scheme: light)" />
   <title><%= typeof title !== 'undefined' ? title : 'public-mail' %></title>
   <script>
     (function () {
@@ -23,78 +23,96 @@
       theme: {
         extend: {
           colors: {
-            ink: { 50:'#f5f7fb', 100:'#eef1f8', 200:'#dde3ef', 300:'#bcc6da', 400:'#8a96b3', 500:'#5b6886', 600:'#3f4a66', 700:'#2a3349', 800:'#1a2236', 900:'#0f1626', 950:'#0b1020' },
-            brand: { 50:'#eef4ff', 100:'#dce8ff', 200:'#b9d2ff', 300:'#8fb2ff', 400:'#6189ff', 500:'#3f63ff', 600:'#2746ee', 700:'#1f37c4', 800:'#1b2f9a', 900:'#1a2a7a' },
+            paper: { 50:'#fbf8f3', 100:'#f5efe5', 200:'#ebe2d2', 300:'#d8c9b0', 400:'#b8a888', 500:'#8a7d62', 600:'#5e5440' },
+            ink:   { 50:'#f5f3ee', 100:'#e6e1d4', 200:'#bfb6a3', 300:'#8d8678', 400:'#5b554a', 500:'#3d3830', 600:'#2d2823', 700:'#221e1a', 800:'#1c1814', 900:'#15110d', 950:'#0e0b08' },
+            sienna:{ 50:'#fbf1e9', 100:'#f3dcc6', 200:'#e6bb95', 300:'#d39561', 400:'#c0784a', 500:'#a85f30', 600:'#8a4a20', 700:'#6b3818', 800:'#4d2811', 900:'#321a0b' },
           },
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-          boxShadow: { glow: '0 0 0 1px rgba(63,99,255,.2), 0 8px 32px -8px rgba(63,99,255,.35)' },
+          fontFamily: {
+            sans:   ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            serif:  ['"Fraunces"', 'ui-serif', 'Georgia', 'serif'],
+            mono:   ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
         }
       }
     }
   </script>
-  <link rel="preconnect" href="https://rsms.me/" />
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="/app.css" />
   <script defer src="https://unpkg.com/lucide@latest"></script>
   <script defer src="https://unpkg.com/alpinejs@3.13.10/dist/cdn.min.js"></script>
 </head>
-<body class="h-full bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100 font-sans antialiased"
+<body class="h-full bg-paper-50 text-ink-800 dark:bg-ink-950 dark:text-ink-100 font-sans antialiased selection:bg-sienna-200 selection:text-ink-900"
       x-data="appShell()" x-cloak>
 
+  <!-- Subtle paper grain overlay -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 z-0 opacity-[0.035] dark:opacity-[0.05] mix-blend-multiply dark:mix-blend-screen grain"></div>
+
   <!-- Toasts -->
-  <div class="fixed z-50 top-3 left-1/2 -translate-x-1/2 flex flex-col gap-2 pointer-events-none" aria-live="polite">
+  <div class="fixed z-50 top-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 pointer-events-none" aria-live="polite">
     <template x-for="t in toasts" :key="t.id">
-      <div class="pointer-events-auto px-4 py-2 rounded-xl shadow-glow backdrop-blur bg-white/90 dark:bg-ink-800/90 border border-ink-200/50 dark:border-ink-700/50 text-sm flex items-center gap-3 animate-toast">
-        <i :data-lucide="t.icon || 'check-circle-2'" class="w-4 h-4 text-brand-500"></i>
+      <div class="pointer-events-auto px-4 py-2.5 rounded-full bg-ink-900 text-paper-50 dark:bg-paper-50 dark:text-ink-900 text-[13px] tracking-tight flex items-center gap-2.5 shadow-2xl animate-toast">
+        <i :data-lucide="t.icon || 'check'" class="w-3.5 h-3.5"></i>
         <span x-text="t.msg"></span>
-        <button x-show="t.undo" @click="t.undo && t.undo()" class="text-brand-500 hover:underline">Undo</button>
       </div>
     </template>
   </div>
 
-  <div class="h-full flex flex-col">
+  <div class="relative z-10 h-full flex flex-col">
 
     <!-- Top bar -->
-    <header class="sticky top-0 z-30 backdrop-blur-xl bg-white/70 dark:bg-ink-950/70 border-b border-ink-200/50 dark:border-ink-800/60">
-      <div class="flex items-center gap-3 px-3 sm:px-5 h-14">
-        <button class="md:hidden p-2 -ml-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800" @click="sidebarOpen = true" aria-label="Open menu">
+    <header class="sticky top-0 z-30 bg-paper-50/85 dark:bg-ink-950/85 backdrop-blur-md border-b border-ink-200/40 dark:border-ink-700/40">
+      <div class="flex items-center gap-4 px-4 sm:px-8 h-16">
+        <button class="md:hidden p-2 -ml-2 rounded-md hover:bg-ink-100/60 dark:hover:bg-ink-800/60" @click="sidebarOpen = true" aria-label="Open menu">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
-        <a href="/" class="flex items-center gap-2 font-bold tracking-tight">
-          <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-700 grid place-items-center text-white shadow-glow">
-            <i data-lucide="mail" class="w-4 h-4"></i>
+        <a href="/" class="flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-md border border-ink-300 dark:border-ink-500 grid place-items-center bg-paper-50 dark:bg-ink-900">
+            <span class="w-1.5 h-1.5 rounded-full bg-sienna-500"></span>
           </span>
-          <span class="hidden sm:inline">public<span class="text-brand-500">·</span>mail</span>
+          <span class="font-serif text-[22px] leading-none tracking-tight font-medium hidden sm:inline">
+            Public<span class="italic text-sienna-600 dark:text-sienna-300">·</span>Mail
+          </span>
         </a>
-        <form action="/" method="get" class="flex-1 max-w-2xl mx-auto relative">
+
+        <form action="/" method="get" class="flex-1 max-w-xl mx-auto relative">
           <input type="hidden" name="folder" value="<%= typeof folder !== 'undefined' ? folder : 'inbox' %>" />
-          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"></i>
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-ink-500"></i>
           <input id="searchInput" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>"
-                 placeholder="Search mail…  (press / )"
-                 class="w-full pl-9 pr-3 h-10 rounded-xl border border-ink-200 dark:border-ink-700 bg-white/80 dark:bg-ink-900/70 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 outline-none transition"/>
+                 placeholder="Search messages"
+                 class="w-full pl-9 pr-12 h-10 rounded-md border border-ink-200/70 dark:border-ink-700 bg-paper-100/40 dark:bg-ink-900/50 focus:bg-paper-50 dark:focus:bg-ink-900 focus:border-ink-400 dark:focus:border-ink-500 focus:ring-0 outline-none text-[14px] tracking-tight placeholder:text-ink-300 dark:placeholder:text-ink-500 transition"/>
+          <kbd class="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px]">/</kbd>
         </form>
-        <button @click="toggleTheme()" class="p-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800" :title="theme === 'dark' ? 'Light mode' : 'Dark mode'">
-          <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-5 h-5"></i>
-        </button>
-        <button @click="shortcutsOpen = true" class="hidden sm:inline-flex p-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800" title="Keyboard shortcuts (?)">
-          <i data-lucide="keyboard" class="w-5 h-5"></i>
-        </button>
+
+        <div class="flex items-center gap-1">
+          <button @click="refreshNow()" class="iconbtn group" :class="refreshing && 'animate-spin-soft'" title="Refresh (r)">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+          <span class="hidden sm:inline text-[11px] tracking-tight text-ink-400 dark:text-ink-500 font-mono tabular-nums select-none" x-text="refreshLabel"></span>
+          <span class="mx-1 hidden sm:inline w-px h-4 bg-ink-200 dark:bg-ink-700"></span>
+          <button @click="toggleTheme()" class="iconbtn" :title="theme === 'dark' ? 'Light' : 'Dark'">
+            <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-4 h-4"></i>
+          </button>
+          <button @click="shortcutsOpen = true" class="iconbtn hidden sm:inline-flex" title="Shortcuts (?)">
+            <i data-lucide="command" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
     </header>
 
     <!-- Body -->
     <div class="flex-1 flex min-h-0">
 
-      <!-- Sidebar (desktop fixed, mobile drawer) -->
-      <aside
-        class="hidden md:flex md:flex-col w-64 lg:w-72 shrink-0 border-r border-ink-200/60 dark:border-ink-800/60 bg-white/40 dark:bg-ink-950/40">
+      <!-- Sidebar desktop -->
+      <aside class="hidden md:flex md:flex-col w-60 lg:w-64 shrink-0 border-r border-ink-200/40 dark:border-ink-700/40">
         <%- include('partials/sidebar', { sidebar: sidebar, folder: typeof folder !== 'undefined' ? folder : null, label: typeof label !== 'undefined' ? label : null, systemFolders: systemFolders }) %>
       </aside>
 
       <!-- Mobile drawer -->
       <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 md:hidden" style="display:none">
-        <div class="absolute inset-0 bg-black/40" @click="sidebarOpen = false"></div>
-        <aside class="absolute inset-y-0 left-0 w-72 max-w-[80%] bg-white dark:bg-ink-950 shadow-2xl flex flex-col"
+        <div class="absolute inset-0 bg-ink-900/40 dark:bg-ink-950/70" @click="sidebarOpen = false"></div>
+        <aside class="absolute inset-y-0 left-0 w-72 max-w-[82%] bg-paper-50 dark:bg-ink-950 border-r border-ink-200 dark:border-ink-800 flex flex-col"
                x-transition:enter="transition transform duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0">
           <%- include('partials/sidebar', { sidebar: sidebar, folder: typeof folder !== 'undefined' ? folder : null, label: typeof label !== 'undefined' ? label : null, systemFolders: systemFolders }) %>
         </aside>
@@ -108,19 +126,21 @@
 
   <!-- Shortcuts modal -->
   <div x-show="shortcutsOpen" x-transition.opacity @keydown.escape.window="shortcutsOpen=false" class="fixed inset-0 z-50 grid place-items-center" style="display:none">
-    <div class="absolute inset-0 bg-black/50" @click="shortcutsOpen=false"></div>
-    <div class="relative w-[92%] max-w-md rounded-2xl bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-700 p-6 shadow-2xl">
-      <h2 class="font-semibold text-lg mb-4 flex items-center gap-2"><i data-lucide="keyboard" class="w-5 h-5"></i> Keyboard shortcuts</h2>
-      <dl class="grid grid-cols-2 gap-y-2 text-sm">
-        <dt><kbd>j</kbd> / <kbd>k</kbd></dt><dd class="text-ink-500">Next / previous</dd>
-        <dt><kbd>↵</kbd></dt><dd class="text-ink-500">Open</dd>
-        <dt><kbd>e</kbd></dt><dd class="text-ink-500">Archive</dd>
-        <dt><kbd>#</kbd></dt><dd class="text-ink-500">Trash</dd>
-        <dt><kbd>s</kbd></dt><dd class="text-ink-500">Star</dd>
-        <dt><kbd>u</kbd></dt><dd class="text-ink-500">Mark unread</dd>
-        <dt><kbd>g</kbd> <kbd>i</kbd></dt><dd class="text-ink-500">Go to inbox</dd>
-        <dt><kbd>/</kbd></dt><dd class="text-ink-500">Search</dd>
-        <dt><kbd>?</kbd></dt><dd class="text-ink-500">Shortcuts</dd>
+    <div class="absolute inset-0 bg-ink-900/50" @click="shortcutsOpen=false"></div>
+    <div class="relative w-[92%] max-w-md rounded-lg bg-paper-50 dark:bg-ink-900 border border-ink-200 dark:border-ink-700 p-7 shadow-2xl">
+      <h2 class="font-serif text-2xl mb-1">Shortcuts</h2>
+      <p class="text-sm text-ink-400 mb-5">A faster way to read.</p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-sm">
+        <dt class="text-right"><kbd>j</kbd> <span class="text-ink-300">/</span> <kbd>k</kbd></dt><dd class="text-ink-500">Next · previous</dd>
+        <dt class="text-right"><kbd>↵</kbd></dt><dd class="text-ink-500">Open</dd>
+        <dt class="text-right"><kbd>r</kbd></dt><dd class="text-ink-500">Refresh</dd>
+        <dt class="text-right"><kbd>e</kbd></dt><dd class="text-ink-500">Archive</dd>
+        <dt class="text-right"><kbd>#</kbd></dt><dd class="text-ink-500">Trash</dd>
+        <dt class="text-right"><kbd>s</kbd></dt><dd class="text-ink-500">Star</dd>
+        <dt class="text-right"><kbd>u</kbd></dt><dd class="text-ink-500">Mark unread</dd>
+        <dt class="text-right"><kbd>g</kbd> <kbd>i</kbd></dt><dd class="text-ink-500">Inbox</dd>
+        <dt class="text-right"><kbd>/</kbd></dt><dd class="text-ink-500">Search</dd>
+        <dt class="text-right"><kbd>?</kbd></dt><dd class="text-ink-500">This window</dd>
       </dl>
     </div>
   </div>

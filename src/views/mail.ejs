@@ -1,84 +1,83 @@
 <%
 const sender = displayName(mail.fromName, mail.fromAddress);
-const colorClass = avatarColor(mail.fromAddress || '');
 const toList = participants.filter(p => p.kind === 'to');
 const ccList = participants.filter(p => p.kind === 'cc');
 const bccList = participants.filter(p => p.kind === 'bcc');
 %>
-<div class="sticky top-14 z-20 backdrop-blur bg-white/70 dark:bg-ink-950/70 border-b border-ink-200/60 dark:border-ink-800/60">
-  <div class="flex items-center gap-1 px-3 sm:px-4 h-12">
-    <a href="javascript:history.length>1?history.back():(location.href='/')" class="btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i><span class="hidden sm:inline">Back</span></a>
-    <div class="mx-2 w-px h-5 bg-ink-200 dark:bg-ink-700"></div>
-    <button data-action="archive" data-id="<%= mail.id %>" class="btn-ghost" title="Archive (e)"><i data-lucide="archive" class="w-4 h-4"></i></button>
-    <button data-action="trash" data-id="<%= mail.id %>" class="btn-ghost text-rose-500" title="Trash (#)"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-    <button data-action="spam" data-id="<%= mail.id %>" class="btn-ghost" title="Mark as spam"><i data-lucide="shield-alert" class="w-4 h-4"></i></button>
-    <div class="mx-1 w-px h-5 bg-ink-200 dark:bg-ink-700"></div>
-    <button data-action="unread" data-id="<%= mail.id %>" class="btn-ghost" title="Mark unread (u)"><i data-lucide="mail" class="w-4 h-4"></i></button>
+<div class="sticky top-16 z-20 bg-paper-50/85 dark:bg-ink-950/85 backdrop-blur-md border-b border-ink-200/40 dark:border-ink-700/40">
+  <div class="flex items-center gap-1 px-4 sm:px-8 h-12">
+    <a href="javascript:history.length>1?history.back():(location.href='/')" class="btn-ghost"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">Back</span></a>
+    <div class="mx-2 w-px h-4 bg-ink-200 dark:bg-ink-700"></div>
+    <button data-action="archive" data-id="<%= mail.id %>" class="btn-ghost" title="Archive (e)"><i data-lucide="archive" class="w-3.5 h-3.5"></i></button>
+    <button data-action="trash" data-id="<%= mail.id %>" class="btn-ghost text-sienna-600 dark:text-sienna-300" title="Trash (#)"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+    <button data-action="spam" data-id="<%= mail.id %>" class="btn-ghost" title="Spam"><i data-lucide="shield-alert" class="w-3.5 h-3.5"></i></button>
+    <div class="mx-1 w-px h-4 bg-ink-200 dark:bg-ink-700"></div>
+    <button data-action="unread" data-id="<%= mail.id %>" class="btn-ghost" title="Mark unread (u)"><i data-lucide="mail" class="w-3.5 h-3.5"></i></button>
     <button data-action="star" data-id="<%= mail.id %>" data-state="<%= mail.starred ? 'on' : 'off' %>" class="btn-ghost" title="Star (s)">
-      <i data-lucide="star" class="w-4 h-4 <%= mail.starred ? 'fill-amber-400 text-amber-400' : '' %>"></i>
+      <i data-lucide="star" class="w-3.5 h-3.5 <%= mail.starred ? 'fill-sienna-500 text-sienna-500' : '' %>"></i>
     </button>
-    <div class="ml-auto text-xs text-ink-400 hidden sm:block"><%= fullTime(mail.receivedAt) %></div>
+    <div class="ml-auto text-[11px] text-ink-400 dark:text-ink-500 hidden sm:block font-mono tabular-nums"><%= fullTime(mail.receivedAt) %></div>
   </div>
 </div>
 
 <div class="flex-1 overflow-y-auto">
-  <div class="max-w-3xl mx-auto px-3 sm:px-6 py-6">
-    <!-- Header -->
-    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4 break-words"><%= mail.subject || '(no subject)' %></h1>
+  <article class="max-w-2xl mx-auto px-4 sm:px-8 py-10 sm:py-14">
+
+    <div class="text-[10px] uppercase tracking-[0.18em] text-ink-400 dark:text-ink-500 mb-3"><%= mail.folder %> · <%= relativeTimeStr(mail.receivedAt) %></div>
+    <h1 class="font-serif text-[32px] sm:text-[44px] leading-[1.1] tracking-tight mb-5 break-words"><%= mail.subject || '(no subject)' %></h1>
 
     <% if (mail.labels && mail.labels.length) { %>
-      <div class="flex flex-wrap gap-1.5 mb-4">
+      <div class="flex flex-wrap gap-1.5 mb-6">
         <% mail.labels.forEach(function(l) { %>
-          <span class="text-xs px-2 py-1 rounded-full bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-500/20"><%= l %></span>
+          <span class="text-[10px] uppercase tracking-wider px-2 py-1 rounded-sm border border-ink-200 dark:border-ink-700 text-ink-500 dark:text-ink-400"><%= l %></span>
         <% }) %>
       </div>
     <% } %>
 
-    <div x-data="{open:false}" class="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-ink-900/60 border border-ink-200 dark:border-ink-800 shadow-sm">
-      <div class="w-11 h-11 shrink-0 rounded-full bg-gradient-to-br <%= colorClass %> text-white grid place-items-center font-bold shadow">
+    <div x-data="{open:false}" class="flex items-start gap-4 pb-6 border-b border-ink-200/60 dark:border-ink-700/40">
+      <div class="w-10 h-10 shrink-0 rounded-full border border-ink-300 dark:border-ink-600 grid place-items-center font-mono text-[11px] tracking-wider text-ink-700 dark:text-ink-200">
         <%= initials(mail.fromName, mail.fromAddress) %>
       </div>
       <div class="min-w-0 flex-1">
-        <div class="flex flex-wrap items-baseline gap-x-2">
-          <span class="font-semibold"><%= sender %></span>
-          <span class="text-sm text-ink-500">&lt;<%= mail.fromAddress %>&gt;</span>
-          <span class="ml-auto text-xs text-ink-400 sm:hidden"><%= relativeTimeStr(mail.receivedAt) %></span>
+        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span class="font-medium text-[15px]"><%= sender %></span>
+          <span class="text-[13px] text-ink-400 font-mono">&lt;<%= mail.fromAddress %>&gt;</span>
         </div>
-        <button @click="open = !open" class="text-xs text-ink-500 hover:text-brand-500 inline-flex items-center gap-1 mt-0.5">
+        <button @click="open = !open" class="text-[12px] text-ink-400 hover:text-sienna-600 dark:hover:text-sienna-300 inline-flex items-center gap-1 mt-1 transition-colors">
           <span x-text="open ? 'Hide details' : 'Show details'"></span>
           <i :data-lucide="open ? 'chevron-up' : 'chevron-down'" class="w-3 h-3"></i>
         </button>
-        <div x-show="open" x-transition class="mt-2 text-sm space-y-1 text-ink-600 dark:text-ink-300" style="display:none">
-          <% if (toList.length) { %><div><span class="text-ink-400 mr-1">to</span><%= toList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
-          <% if (ccList.length) { %><div><span class="text-ink-400 mr-1">cc</span><%= ccList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
-          <% if (bccList.length) { %><div><span class="text-ink-400 mr-1">bcc</span><%= bccList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
-          <% if (mail.replyTo) { %><div><span class="text-ink-400 mr-1">reply-to</span><%= mail.replyTo %></div><% } %>
-          <div><span class="text-ink-400 mr-1">received</span><%= fullTime(mail.receivedAt) %></div>
-          <div class="font-mono text-xs break-all"><span class="text-ink-400 mr-1">message-id</span><%= mail.messageId %></div>
+        <div x-show="open" x-transition class="mt-3 text-[13px] space-y-1.5 text-ink-500 dark:text-ink-400" style="display:none">
+          <% if (toList.length) { %><div><span class="text-ink-300 dark:text-ink-500 uppercase tracking-wider text-[10px] mr-2">to</span><%= toList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
+          <% if (ccList.length) { %><div><span class="text-ink-300 dark:text-ink-500 uppercase tracking-wider text-[10px] mr-2">cc</span><%= ccList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
+          <% if (bccList.length) { %><div><span class="text-ink-300 dark:text-ink-500 uppercase tracking-wider text-[10px] mr-2">bcc</span><%= bccList.map(p => displayName(p.name, p.address) + ' <' + p.address + '>').join(', ') %></div><% } %>
+          <% if (mail.replyTo) { %><div><span class="text-ink-300 dark:text-ink-500 uppercase tracking-wider text-[10px] mr-2">reply-to</span><%= mail.replyTo %></div><% } %>
+          <div><span class="text-ink-300 dark:text-ink-500 uppercase tracking-wider text-[10px] mr-2">received</span><%= fullTime(mail.receivedAt) %></div>
+          <div class="font-mono text-[11px] break-all"><span class="text-ink-300 dark:text-ink-500 uppercase tracking-wider text-[10px] mr-2 font-sans">id</span><%= mail.messageId %></div>
         </div>
       </div>
     </div>
 
     <!-- Body -->
-    <div class="mt-5 rounded-2xl overflow-hidden border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900/60">
+    <div class="mt-8 prose-mail">
       <% if (mail.html) { %>
         <iframe id="mailFrame" sandbox="allow-popups allow-popups-to-escape-sandbox"
-                srcdoc="<%= escapeHtml(`<!doctype html><html><head><meta charset='utf-8'><base target='_blank'><style>html,body{margin:0;padding:16px;font-family:Inter,system-ui,sans-serif;color:#1a2236;line-height:1.55;word-wrap:break-word}body{background:transparent}@media (prefers-color-scheme: dark){html,body{color:#eef1f8}}a{color:#2746ee}img{max-width:100%;height:auto}table{max-width:100%}</style></head><body>${sanitizedHtml}</body></html>`) %>"
-                class="w-full block bg-white dark:bg-ink-900" style="height: 60vh; min-height: 380px;"></iframe>
+                srcdoc="<%= escapeHtml(`<!doctype html><html><head><meta charset='utf-8'><base target='_blank'><style>html,body{margin:0;padding:0;font-family:Inter,system-ui,sans-serif;color:#1c1814;line-height:1.7;font-size:15px;word-wrap:break-word;background:transparent}@media (prefers-color-scheme: dark){html,body{color:#e6e1d4}}a{color:#a85f30;text-decoration:underline;text-underline-offset:2px}img{max-width:100%;height:auto;border-radius:4px}table{max-width:100%}blockquote{border-left:2px solid #d8c9b0;padding-left:1em;margin-left:0;color:#5b554a;font-style:italic}h1,h2,h3{font-family:Fraunces,Georgia,serif;letter-spacing:-0.01em}</style></head><body>${sanitizedHtml}</body></html>`) %>"
+                class="w-full block bg-transparent" style="height: 60vh; min-height: 320px;"></iframe>
       <% } else if (mail.text) { %>
-        <pre class="whitespace-pre-wrap break-words p-5 text-sm leading-relaxed"><%= mail.text %></pre>
+        <pre class="whitespace-pre-wrap break-words font-sans text-[15px] leading-relaxed text-ink-700 dark:text-ink-200"><%= mail.text %></pre>
       <% } else { %>
-        <div class="p-5 text-ink-400 italic">(empty body)</div>
+        <div class="text-ink-300 dark:text-ink-600 italic font-serif">(empty body)</div>
       <% } %>
     </div>
 
     <!-- Attachments -->
     <% if (attachments && attachments.length) { %>
-      <div class="mt-5">
-        <h3 class="text-sm font-semibold text-ink-500 mb-2 flex items-center gap-2">
-          <i data-lucide="paperclip" class="w-4 h-4"></i> <%= attachments.length %> attachment<%= attachments.length === 1 ? '' : 's' %>
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="mt-10 pt-6 border-t border-ink-200/60 dark:border-ink-700/40">
+        <div class="text-[10px] uppercase tracking-[0.18em] text-ink-400 dark:text-ink-500 mb-3">
+          <%= attachments.length %> attachment<%= attachments.length === 1 ? '' : 's' %>
+        </div>
+        <div class="space-y-2">
           <% attachments.forEach(function(a) {
             const mt = (a.mimeType || '').toLowerCase();
             let icon = 'file';
@@ -90,21 +89,23 @@ const bccList = participants.filter(p => p.kind === 'bcc');
             else if (mt.includes('sheet') || mt.includes('excel')) icon = 'file-spreadsheet';
             else if (mt.includes('word') || mt.includes('document')) icon = 'file-text';
           %>
-            <a href="/attachments/<%= a.id %>" class="group flex items-center gap-3 p-3 rounded-xl border border-ink-200 dark:border-ink-800 hover:border-brand-500 hover:bg-brand-500/5 transition">
-              <span class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-700 text-white grid place-items-center shadow">
-                <i data-lucide="<%= icon %>" class="w-5 h-5"></i>
+            <a href="/attachments/<%= a.id %>" class="group flex items-center gap-3 p-3 rounded-md border border-ink-200/60 dark:border-ink-700/60 hover:border-ink-400 dark:hover:border-ink-500 hover:bg-paper-100/50 dark:hover:bg-ink-900/50 transition">
+              <span class="w-9 h-9 rounded-md border border-ink-200 dark:border-ink-700 grid place-items-center text-ink-500 dark:text-ink-400 group-hover:text-sienna-600 dark:group-hover:text-sienna-300 transition-colors">
+                <i data-lucide="<%= icon %>" class="w-4 h-4"></i>
               </span>
               <div class="min-w-0 flex-1">
-                <div class="truncate font-medium text-sm"><%= a.filename || 'attachment' %></div>
-                <div class="text-xs text-ink-400"><%= a.mimeType || 'application/octet-stream' %> · <%= fmtBytes(a.sizeBytes) %></div>
+                <div class="truncate text-[14px] text-ink-800 dark:text-ink-100"><%= a.filename || 'attachment' %></div>
+                <div class="text-[11px] font-mono text-ink-400 dark:text-ink-500"><%= a.mimeType || 'application/octet-stream' %> · <%= fmtBytes(a.sizeBytes) %></div>
               </div>
-              <i data-lucide="download" class="w-4 h-4 text-ink-400 group-hover:text-brand-500"></i>
+              <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-ink-300 dark:text-ink-500 group-hover:text-sienna-600 dark:group-hover:text-sienna-300 transition-colors"></i>
             </a>
           <% }) %>
         </div>
       </div>
     <% } %>
-  </div>
+
+    <div class="mt-14 text-center font-serif italic text-ink-300 dark:text-ink-600">⁂</div>
+  </article>
 </div>
 
 <script>
@@ -117,7 +118,7 @@ const bccList = participants.filter(p => p.kind === 'bcc');
         if (!doc) return;
         const resize = () => {
           const h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
-          f.style.height = (h + 24) + 'px';
+          f.style.height = (h + 16) + 'px';
         };
         resize();
         new ResizeObserver(resize).observe(doc.body);

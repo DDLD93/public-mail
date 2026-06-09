@@ -1,57 +1,124 @@
 [x-cloak] { display: none !important; }
 
-html { scrollbar-color: #bcc6da transparent; }
-html.dark { scrollbar-color: #3f4a66 transparent; }
-::-webkit-scrollbar { width: 10px; height: 10px; }
+:root {
+  --paper-50: #fbf8f3;
+  --ink-200: #bfb6a3;
+  --ink-700: #221e1a;
+}
+
+html { scrollbar-color: rgba(140,134,120,.4) transparent; }
+html.dark { scrollbar-color: rgba(140,134,120,.4) transparent; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(140,150,180,.35); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: rgba(140,150,180,.6); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb { background: rgba(140,134,120,.3); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(140,134,120,.55); border: 2px solid transparent; background-clip: padding-box; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
+/* Paper grain — subtle SVG noise */
+.grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.12  0 0 0 0 0.08  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 280px 280px;
+}
+
+/* Chips — refined */
 .chip {
-  display: inline-flex; align-items: center; gap: .35rem;
-  height: 28px; padding: 0 .65rem;
+  display: inline-flex; align-items: center; gap: .4rem;
+  height: 28px; padding: 0 .85rem;
   font-size: 12px; font-weight: 500;
+  letter-spacing: .01em;
   border-radius: 999px;
-  border: 1px solid rgb(221 227 239);
-  color: rgb(91 104 134);
-  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(34,30,26,.12);
+  color: #5b554a;
+  background: transparent;
   white-space: nowrap;
-  transition: all .15s;
+  transition: all .15s ease;
 }
-html.dark .chip { border-color: rgb(42 51 73); color: rgb(188 198 218); background: rgba(15 22 38 / .5); }
-.chip:hover { border-color: rgb(63 99 255); color: rgb(63 99 255); }
-.chip-on { background: linear-gradient(135deg, rgb(63 99 255), rgb(31 55 196)); color: white !important; border-color: transparent !important; box-shadow: 0 4px 14px -4px rgba(63,99,255,.5); }
-
-.btn-ghost {
-  display: inline-flex; align-items: center; gap: .35rem;
-  height: 34px; padding: 0 .65rem;
-  border-radius: 10px;
-  color: inherit;
-  transition: background .12s;
-  font-size: 13px;
+html.dark .chip { border-color: rgba(245,243,238,.12); color: #bfb6a3; }
+.chip:hover { border-color: rgba(34,30,26,.3); color: #221e1a; }
+html.dark .chip:hover { border-color: rgba(245,243,238,.3); color: #f5f3ee; }
+.chip-on {
+  background: #221e1a; color: #fbf8f3 !important;
+  border-color: #221e1a !important;
 }
-.btn-ghost:hover { background: rgba(140,150,180,.15); }
+html.dark .chip-on { background: #f5f3ee; color: #15110d !important; border-color: #f5f3ee !important; }
 
-kbd {
-  display: inline-block;
-  padding: 1px 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+/* Sidebar rows */
+.sb-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .5rem;
+  height: 32px; padding: 0 .65rem;
   border-radius: 6px;
-  border: 1px solid rgb(221 227 239);
-  background: rgb(245 247 251);
-  color: rgb(63 74 102);
-  box-shadow: 0 1px 0 rgb(221 227 239);
+  font-size: 13.5px;
+  color: #3d3830;
+  transition: background .12s, color .12s;
 }
-html.dark kbd { background: rgb(26 34 54); border-color: rgb(42 51 73); color: rgb(188 198 218); box-shadow: 0 1px 0 rgb(42 51 73); }
+html.dark .sb-row { color: #bfb6a3; }
+.sb-row:hover { background: rgba(34,30,26,.05); color: #15110d; }
+html.dark .sb-row:hover { background: rgba(245,243,238,.05); color: #f5f3ee; }
+.sb-row-active {
+  background: rgba(34,30,26,.06); color: #15110d; font-weight: 500;
+}
+html.dark .sb-row-active { background: rgba(245,243,238,.07); color: #f5f3ee; }
 
-@keyframes toastIn { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.animate-toast { animation: toastIn .18s ease-out both; }
+/* Ghost buttons */
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: .4rem;
+  height: 32px; padding: 0 .65rem;
+  border-radius: 6px;
+  color: inherit;
+  font-size: 12.5px;
+  transition: background .12s;
+}
+.btn-ghost:hover { background: rgba(34,30,26,.06); }
+html.dark .btn-ghost:hover { background: rgba(245,243,238,.06); }
 
-.mail-row.selected { background: rgba(63,99,255,.08) !important; }
-.mail-row[data-current="1"] { box-shadow: inset 3px 0 0 rgb(63 99 255); }
+/* Icon buttons (top bar) */
+.iconbtn {
+  width: 34px; height: 34px;
+  display: inline-grid; place-items: center;
+  border-radius: 6px;
+  color: #3d3830;
+  transition: background .12s, color .12s;
+}
+html.dark .iconbtn { color: #bfb6a3; }
+.iconbtn:hover { background: rgba(34,30,26,.06); color: #15110d; }
+html.dark .iconbtn:hover { background: rgba(245,243,238,.06); color: #f5f3ee; }
+
+/* Kbd */
+kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-size: 10.5px;
+  border-radius: 4px;
+  border: 1px solid rgba(34,30,26,.15);
+  background: rgba(34,30,26,.04);
+  color: #3d3830;
+  letter-spacing: 0;
+}
+html.dark kbd { background: rgba(245,243,238,.05); border-color: rgba(245,243,238,.15); color: #bfb6a3; }
+
+/* Toast animation */
+@keyframes toastIn { from { transform: translateY(-8px) scale(.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+.animate-toast { animation: toastIn .22s cubic-bezier(.16,.84,.44,1) both; }
+
+/* Soft spin for refresh */
+@keyframes spinSoft { to { transform: rotate(360deg); } }
+.animate-spin-soft i { animation: spinSoft .8s cubic-bezier(.5,.1,.5,.9); transform-origin: center; }
+
+/* Mail row selection */
+.mail-row.selected { background: rgba(168,95,48,.05) !important; }
+html.dark .mail-row.selected { background: rgba(211,149,97,.07) !important; }
+.mail-row[data-current="1"] { background: rgba(34,30,26,.04); }
+html.dark .mail-row[data-current="1"] { background: rgba(245,243,238,.04); }
 
 iframe#mailFrame { color-scheme: light dark; }
+
+/* Refined typography */
+body { font-feature-settings: "ss01", "cv11"; }
+.font-serif { font-feature-settings: "ss01"; }
+
+/* Mail row link reset */
+.mail-row { text-decoration: none; color: inherit; }
