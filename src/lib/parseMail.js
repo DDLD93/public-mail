@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { eq, sql } from 'drizzle-orm';
 import { mails, mailParticipants, attachments } from '../db/schema.js';
+import { createLogger } from './logger.js';
+
+const log = createLogger('webhook');
 
 const participantSchema = z.object({
   address: z.string().min(1),
@@ -77,7 +80,7 @@ export function parseMail(rawPayload) {
   };
 }
 
-export async function persistMail(db, parsed) {
+export async function persistMail(db, parsed, reqId = null) {
   return db.transaction(async (tx) => {
     const existing = await tx
       .select({ id: mails.id })
@@ -86,11 +89,21 @@ export async function persistMail(db, parsed) {
       .limit(1);
 
     if (existing.length) {
+      log.debug(reqId, 'duplicate messageId', {
+        messageId: parsed.messageId,
+        existingId: existing[0].id,
+      });
       return { id: existing[0].id, duplicate: true };
     }
 
     const snippet = makeSnippet(parsed.text, parsed.html);
     const hasAttachments = parsed.attachments.length > 0;
+
+    log.debug(reqId, 'persisting mail', {
+      messageId: parsed.messageId,
+      participantCount: parsed.to.length + parsed.cc.length + parsed.bcc.length,
+      hasAttachments,
+    });
 
     const inserted = await tx
       .insert(mails)
@@ -124,14 +137,20 @@ export async function persistMail(db, parsed) {
     }
 
     if (hasAttachments) {
-      const attRows = parsed.attachments.map((a) => {
+      const attRows = parsed.attachments.map((a, index) => {
         let buf = null;
         let size = 0;
         if (a.content) {
           try {
             buf = Buffer.from(a.content, 'base64');
             size = buf.length;
-          } catch {
+          } catch (err) {
+            log.warn(reqId, 'attachment base64 decode failed', {
+              messageId: parsed.messageId,
+              index,
+              filename: a.filename,
+              err: err.message,
+            });
             buf = null;
           }
         }
@@ -145,6 +164,13 @@ export async function persistMail(db, parsed) {
       });
       await tx.insert(attachments).values(attRows);
     }
+
+    log.debug(reqId, 'mail persisted', {
+      id: mailId,
+      messageId: parsed.messageId,
+      participantCount: participantRows.length,
+      attachmentCount: hasAttachments ? parsed.attachments.length : 0,
+    });
 
     return { id: mailId, duplicate: false };
   });
