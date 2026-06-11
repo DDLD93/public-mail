@@ -8,7 +8,7 @@ function appShell() {
     refreshing: false,
     lastRefresh: Date.now(),
     refreshLabel: 'Updated just now',
-    autoRefreshMs: 60_000,
+    autoRefreshMs: 8_000,
     _tickTimer: null,
     _autoTimer: null,
 
