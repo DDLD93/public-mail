@@ -1,9 +1,11 @@
 <%
 const sender = displayName(mail.fromName, mail.fromAddress);
-const senderDom = domainOf(mail.fromAddress);
 const toList = participants.filter(p => p.kind === 'to');
 const ccList = participants.filter(p => p.kind === 'cc');
 const bccList = participants.filter(p => p.kind === 'bcc');
+const primaryTo = toList[0] || null;
+const recipient = primaryTo ? displayName(primaryTo.name, primaryTo.address) : '(no recipient)';
+const recipientDom = primaryTo ? domainOf(primaryTo.address) : '';
 %>
 <div class="sticky top-14 z-20 bg-bone-50/90 dark:bg-coal-950/90 backdrop-blur-md border-b border-coal-900/15 dark:border-coal-50/12">
   <div class="flex items-center gap-1 px-3 sm:px-6 h-12">
@@ -37,22 +39,43 @@ const bccList = participants.filter(p => p.kind === 'bcc');
       </div>
     <% } %>
 
-    <div x-data="{open:false}" class="flex items-start gap-3.5 pb-6 border-b border-coal-900/15 dark:border-coal-50/12">
-      <div class="w-10 h-10 shrink-0 border border-phos-500/50 grid place-items-center text-[11px] tracking-wider text-phos-600 dark:text-phos-400">
+    <div class="pb-4 border-b border-coal-900/15 dark:border-coal-50/12">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 shrink-0 border border-phos-500/50 grid place-items-center text-[11px] tracking-wider text-phos-600 dark:text-phos-400">
+          <%= initials(primaryTo ? primaryTo.name : null, primaryTo ? primaryTo.address : '') %>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="text-[10px] uppercase tracking-wider text-coal-300 dark:text-coal-300 mb-1">to</div>
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span class="font-semibold text-[14px]"><%= recipient %></span>
+            <% if (primaryTo) { %>
+              <span class="text-[12px] text-coal-300 dark:text-coal-300">&lt;<%= primaryTo.address %>&gt;</span>
+            <% } %>
+            <% if (recipientDom) { %>
+              <a href="/?domain=<%= encodeURIComponent(recipientDom) %>" title="Filter by receiver @<%= recipientDom %>"
+                 class="inline-flex items-center gap-1 px-1.5 h-[18px] text-[10px] border border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200 hover:border-phos-500 hover:text-phos-500 transition-colors">
+                <span class="w-1.5 h-1.5 <%= domainColor(recipientDom) %>"></span><%= recipientDom %>
+              </a>
+            <% } %>
+            <% if (toList.length > 1) { %>
+              <span class="text-[11px] text-coal-400 dark:text-coal-300">+<%= toList.length - 1 %> more</span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div x-data="{open:false}" class="flex items-start gap-3.5 py-4 border-b border-coal-900/15 dark:border-coal-50/12">
+      <div class="w-10 h-10 shrink-0 border border-coal-900/15 dark:border-coal-50/15 grid place-items-center text-[11px] tracking-wider text-coal-500 dark:text-coal-300">
         <%= initials(mail.fromName, mail.fromAddress) %>
       </div>
       <div class="min-w-0 flex-1">
+        <div class="text-[10px] uppercase tracking-wider text-coal-300 dark:text-coal-300 mb-1">from</div>
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span class="font-semibold text-[14px]"><%= sender %></span>
           <span class="text-[12px] text-coal-300 dark:text-coal-300">&lt;<%= mail.fromAddress %>&gt;</span>
-          <% if (senderDom) { %>
-            <a href="/?domain=<%= encodeURIComponent(senderDom) %>" title="Filter by @<%= senderDom %>"
-               class="inline-flex items-center gap-1 px-1.5 h-[18px] text-[10px] border border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200 hover:border-phos-500 hover:text-phos-500 transition-colors">
-              <span class="w-1.5 h-1.5 <%= domainColor(senderDom) %>"></span><%= senderDom %>
-            </a>
-          <% } %>
         </div>
-        <button @click="open = !open" class="text-[12px] text-coal-400 dark:text-coal-200 hover:text-phos-600 dark:hover:text-phos-400 inline-flex items-center gap-1 mt-1 transition-colors">
+        <button @click="open = !open" class="text-[12px] text-coal-400 dark:text-coal-200 hover:text-phos-600 dark:hover:text-phos-400 inline-flex items-center gap-1 mt-2 transition-colors">
           <span x-text="open ? '[-] hide headers' : '[+] show headers'"></span>
         </button>
         <div x-show="open" x-transition class="mt-3 text-[12px] space-y-1.5 text-coal-500 dark:text-coal-200" style="display:none">
@@ -68,10 +91,10 @@ const bccList = participants.filter(p => p.kind === 'bcc');
 
     <!-- Body -->
     <div class="mt-8 prose-mail">
-      <% if (mail.html) { %>
-        <iframe id="mailFrame" sandbox="allow-popups allow-popups-to-escape-sandbox"
-                srcdoc="<%= escapeHtml(`<!doctype html><html><head><meta charset='utf-8'><base target='_blank'><style>html,body{margin:0;padding:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1d2319;line-height:1.7;font-size:15px;word-wrap:break-word;background:transparent}@media (prefers-color-scheme: dark){html,body{color:#bcc4b9}}a{color:#15a259;text-decoration:underline;text-underline-offset:2px}@media (prefers-color-scheme: dark){a{color:#23c46c}}img{max-width:100%;height:auto}table{max-width:100%}blockquote{border-left:2px solid #15a259;padding-left:1em;margin-left:0;color:#646e60}h1,h2,h3{font-family:'IBM Plex Sans',sans-serif;letter-spacing:-0.01em;font-weight:600}code,pre{font-family:'IBM Plex Mono',monospace}</style></head><body>${sanitizedHtml}</body></html>`) %>"
-                class="w-full block bg-transparent" style="height: 60vh; min-height: 320px;"></iframe>
+      <% if (mailFrameSrcdoc) { %>
+        <iframe id="mailFrame" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                srcdoc="<%= mailFrameSrcdoc %>"
+                class="w-full block bg-transparent border-0" style="height: 60vh; min-height: 320px;"></iframe>
       <% } else if (mail.text) { %>
         <pre class="whitespace-pre-wrap break-words font-sans text-[15px] leading-relaxed text-coal-700 dark:text-coal-100"><%= mail.text %></pre>
       <% } else { %>

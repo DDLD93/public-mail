@@ -45,6 +45,7 @@ The endpoint is idempotent on `messageId` — replays return `200 {duplicate:tru
 - **Dark mode** with system-preference detection and persistence
 - **Full-text search** (Postgres `tsvector`) with ILIKE fallback
 - **Filter chips**: unread / starred / has-attachment
+- **Receiver domains**: sidebar `domains/` and `?domain=` filter by primary `to` address domain (not sender)
 - **Folders**: inbox, archive, spam, trash + system "Starred"
 - **Labels** with live counts (use the `label-add`/`label-remove` actions)
 - **Bulk select** with sliding action bar

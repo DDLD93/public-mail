@@ -2,7 +2,9 @@
 const m = mail;
 const isUnread = m.status === 'unread';
 const sender = displayName(m.fromName, m.fromAddress);
-const dom = domainOf(m.fromAddress);
+const primaryTo = m.primaryTo;
+const recipient = primaryTo ? displayName(primaryTo.name, primaryTo.address) : '(no recipient)';
+const dom = primaryTo ? domainOf(primaryTo.address) : '';
 const domDot = dom ? domainColor(dom) : '';
 const curDomain = (typeof activeDomain !== 'undefined' && activeDomain) ? String(activeDomain).toLowerCase() : null;
 const domActive = curDomain && dom && curDomain === dom;
@@ -29,11 +31,11 @@ const domActive = curDomain && dom && curDomain === dom;
 
   <div class="min-w-0">
     <div class="flex items-center gap-2 mb-0.5">
-      <span class="truncate text-[13px] <%= isUnread ? 'font-semibold text-coal-900 dark:text-coal-50' : 'text-coal-500 dark:text-coal-200' %>"><%= sender %></span>
+      <span class="truncate text-[13px] <%= isUnread ? 'font-semibold text-coal-900 dark:text-coal-50' : 'text-coal-500 dark:text-coal-200' %>"><%= recipient %></span>
       <% if (dom) { %>
         <button type="button"
                 onclick="event.preventDefault();event.stopPropagation();location.href='/?domain=<%= encodeURIComponent(dom) %>'"
-                title="Filter by @<%= dom %>"
+                title="Filter by receiver @<%= dom %>"
                 class="shrink-0 inline-flex items-center gap-1 px-1.5 h-[18px] text-[10px] border transition-colors <%= domActive ? 'border-phos-500 text-phos-600 dark:text-phos-400 bg-phos-500/10' : 'border-coal-900/15 dark:border-coal-50/15 text-coal-400 dark:text-coal-200 hover:border-phos-500 hover:text-phos-500' %>">
           <span class="w-1.5 h-1.5 <%= domDot %>"></span><%= dom %>
         </button>
@@ -44,6 +46,7 @@ const domActive = curDomain && dom && curDomain === dom;
         <% }) %>
       <% } %>
     </div>
+    <div class="truncate text-[11px] text-coal-400 dark:text-coal-300 mb-0.5">from: <%= sender %></div>
     <div class="flex items-center gap-1.5 mb-0.5">
       <span class="text-[14px] leading-snug truncate font-sans <%= isUnread ? 'font-medium text-coal-900 dark:text-coal-50' : 'text-coal-600 dark:text-coal-100' %>"><%= m.subject || '(no subject)' %></span>
       <% if (m.hasAttachments) { %>

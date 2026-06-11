@@ -3,7 +3,7 @@ import { eq, sql, and, inArray, desc, asc } from 'drizzle-orm';
 import { db } from '../db/client.js';
 import { mails, mailParticipants, attachments } from '../db/schema.js';
 import { listMails, folderCounts, labelCounts, domainCounts, starredCount } from '../lib/search.js';
-import { sanitizeMailHtml } from '../lib/sanitize.js';
+import { sanitizeMailHtml, buildMailFrameSrcdoc } from '../lib/sanitize.js';
 import { relativeTimeStr, fullTime, initials, avatarColor, fmtBytes, displayName, escapeHtml, domainOf, domainColor } from '../lib/format.js';
 
 const router = Router();
@@ -106,7 +106,9 @@ router.get('/mail/:id', async (req, res, next) => {
       }).from(attachments).where(eq(attachments.mailId, id)),
     ]);
 
-    const sanitizedHtml = mail.html ? sanitizeMailHtml(mail.html) : '';
+    const mailFrameSrcdoc = mail.html
+      ? buildMailFrameSrcdoc(sanitizeMailHtml(mail.html))
+      : '';
 
     res.render('mail', {
       ...commonLocals(),
@@ -115,7 +117,7 @@ router.get('/mail/:id', async (req, res, next) => {
       mail,
       participants,
       attachments: atts,
-      sanitizedHtml,
+      mailFrameSrcdoc,
       sidebar: await getSidebar(),
       systemFolders: SYSTEM_FOLDERS,
     });

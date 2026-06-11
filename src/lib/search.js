@@ -20,7 +20,13 @@ export function buildMailFilters({ folder, q, label, domain, unread, starred, at
         ilike(mails.subject, like),
         ilike(mails.fromAddress, like),
         ilike(mails.fromName, like),
-        ilike(mails.snippet, like)
+        ilike(mails.snippet, like),
+        sql`exists (
+          select 1 from mail_participants mp
+          where mp.mail_id = ${mails.id}
+            and mp.kind = 'to'
+            and (mp.address ilike ${like} or mp.name ilike ${like})
+        )`
       )
     );
   }
@@ -30,7 +36,12 @@ export function buildMailFilters({ folder, q, label, domain, unread, starred, at
   }
   if (domain) {
     clauses.push(
-      sql`lower(split_part(${mails.fromAddress}, '@', 2)) = ${domain.toLowerCase()}`
+      sql`exists (
+        select 1 from mail_participants mp
+        where mp.mail_id = ${mails.id}
+          and mp.kind = 'to'
+          and lower(split_part(mp.address, '@', 2)) = ${domain.toLowerCase()}
+      )`
     );
   }
   if (unread) clauses.push(eq(mails.status, 'unread'));
@@ -38,6 +49,29 @@ export function buildMailFilters({ folder, q, label, domain, unread, starred, at
   if (attachments) clauses.push(eq(mails.hasAttachments, true));
 
   return clauses.length ? and(...clauses) : undefined;
+}
+
+async function attachPrimaryRecipients(db, items) {
+  if (!items.length) return items;
+
+  const ids = items.map((m) => m.id);
+  const rows = await db.execute(sql`
+    select distinct on (mail_id) mail_id, address, name
+    from mail_participants
+    where mail_id in (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})
+      and kind = 'to'
+    order by mail_id, id
+  `);
+  const participantRows = rows.rows || rows;
+  const byMailId = new Map();
+  for (const row of participantRows) {
+    byMailId.set(row.mail_id, { address: row.address, name: row.name });
+  }
+
+  return items.map((mail) => ({
+    ...mail,
+    primaryTo: byMailId.get(mail.id) || null,
+  }));
 }
 
 export async function listMails(db, opts) {
@@ -59,7 +93,8 @@ export async function listMails(db, opts) {
     .limit(limit + 1);
 
   const hasMore = rows.length > limit;
-  const items = hasMore ? rows.slice(0, limit) : rows;
+  const slice = hasMore ? rows.slice(0, limit) : rows;
+  const items = await attachPrimaryRecipients(db, slice);
   const nextCursor = hasMore ? items[items.length - 1].receivedAt.toISOString() : null;
   return { items, nextCursor };
 }
@@ -93,8 +128,10 @@ export async function domainCounts(db, limit = 20) {
     select domain, count(*)::int as total,
       sum(case when status='unread' then 1 else 0 end)::int as unread
     from (
-      select lower(split_part(from_address, '@', 2)) as domain, status
-      from mails where folder <> 'trash'
+      select lower(split_part(mp.address, '@', 2)) as domain, m.status
+      from mail_participants mp
+      join mails m on m.id = mp.mail_id
+      where mp.kind = 'to' and m.folder <> 'trash'
     ) x
     where domain <> ''
     group by domain

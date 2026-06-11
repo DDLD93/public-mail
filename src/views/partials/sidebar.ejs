@@ -84,7 +84,7 @@ function isActive(name) { return folder === name && !label; }
            const active = (typeof domain !== 'undefined' && domain) && domain.toLowerCase() === d.domain;
       %>
         <a href="/?domain=<%= encodeURIComponent(d.domain) %>"
-           class="sb-row <%= active ? 'sb-row-active' : '' %>" title="@<%= d.domain %>">
+           class="sb-row <%= active ? 'sb-row-active' : '' %>" title="Filter by receiver @<%= d.domain %>">
           <span class="flex items-center gap-2.5 truncate">
             <span class="text-coal-300 dark:text-coal-300">@</span>
             <span class="w-1.5 h-1.5 <%= domainColor(d.domain) %>"></span>
