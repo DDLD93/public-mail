@@ -16,6 +16,27 @@ const attachmentSchema = z.object({
   content: z.string().nullish(), // base64
 });
 
+function normalizeReplyTo(value) {
+  if (value == null || value === '') return null;
+  if (typeof value === 'string') return value.trim() || null;
+  if (!Array.isArray(value)) return null;
+
+  const addresses = value
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object' && item.address) return String(item.address).trim();
+      return '';
+    })
+    .filter(Boolean);
+
+  return addresses.length ? addresses.join(', ') : null;
+}
+
+const replyToSchema = z
+  .union([z.string(), z.array(participantSchema), z.array(z.string())])
+  .nullish()
+  .transform(normalizeReplyTo);
+
 export const webhookPayloadSchema = z.object({
   messageId: z.string().min(1),
   from: participantSchema,
@@ -25,7 +46,7 @@ export const webhookPayloadSchema = z.object({
   subject: z.string().nullish(),
   html: z.string().nullish(),
   text: z.string().nullish(),
-  replyTo: z.string().nullish(),
+  replyTo: replyToSchema,
   attachments: z.array(attachmentSchema).default([]),
 });
 
@@ -66,7 +87,7 @@ export function parseMail(rawPayload) {
     to,
     cc,
     bcc,
-    replyTo: payload.replyTo || null,
+    replyTo: payload.replyTo,
     html: payload.html || null,
     text: payload.text || null,
     attachments: (payload.attachments || []).map((a) => ({

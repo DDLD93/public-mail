@@ -19,6 +19,8 @@ function summarizePayload(body) {
     subject: body.subject ? String(body.subject).slice(0, 80) : null,
     hasHtml: Boolean(body.html),
     hasText: Boolean(body.text),
+    replyToType: body.replyTo == null ? null : Array.isArray(body.replyTo) ? 'array' : typeof body.replyTo,
+    replyToCount: Array.isArray(body.replyTo) ? body.replyTo.length : null,
   };
 }
 
